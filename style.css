@@ -1,0 +1,2358 @@
+/* =====================================================================
+   BEAVIE Parfums — stylesheet
+   ---------------------------------------------------------------------
+   1. Design tokens        6. Collection cards
+   2. Base & utilities     7. Scent sections + bottle rig
+   3. Shared atmosphere    8. Per-scent particle layers
+   4. Header & buttons     9. Heritage, press, footer
+   5. Hero                10. Discover-the-scent drawer
+                          11. Responsive & reduced motion
+   ===================================================================== */
+
+/* ---------- 1. DESIGN TOKENS ---------------------------------------- */
+:root {
+  /* Brand palette */
+  --navy-950: #03070f;
+  --navy-900: #060d1f;
+  --navy-800: #0a1733;
+  --navy-700: #12264f;
+  --navy-600: #1d3a72;
+  --obsidian: #040509;
+  --charcoal: #14161c;
+  --mist: #9ea7b8;
+  --mist-soft: rgba(196, 204, 218, 0.72);
+  --silver-50: #f5f6f8;
+  --silver-200: #d9dde4;
+  --silver-400: #a7aebb;
+  --silver-600: #6d7482;
+  --ink: #171a22;
+  --line: rgba(214, 221, 233, 0.16);
+  --line-strong: rgba(214, 221, 233, 0.32);
+
+  /* The single accent: polished silver */
+  --metal: linear-gradient(
+    120deg,
+    #8e95a3 0%,
+    #f7f8fa 18%,
+    #b3b9c4 34%,
+    #ffffff 48%,
+    #7c8391 64%,
+    #e4e7ec 82%,
+    #9aa1ae 100%
+  );
+
+  /* Typography */
+  --font-display: "Cormorant Garamond", "Cormorant", Garamond, "Times New Roman", serif;
+  --font-ui: "Jost", "Futura", "Avenir Next", system-ui, sans-serif;
+  --track-wide: 0.32em;
+  --track-ui: 0.18em;
+
+  /* Spacing (8px rhythm) */
+  --space-1: 8px;
+  --space-2: 16px;
+  --space-3: 24px;
+  --space-4: 32px;
+  --space-6: 48px;
+  --space-8: 64px;
+  --space-12: 96px;
+  --gutter: clamp(20px, 5vw, 80px);
+  --header-h: 76px;
+
+  /* Shape rule: actions are pills, surfaces 6px, the drawer sheet 18px */
+  --radius-surface: 6px;
+  --radius-sheet: 18px;
+
+  /* Motion (curves from Emil Kowalski's animation standards) */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+  --dur-press: 160ms;
+  --dur-ui: 240ms;
+  --dur-drawer: 480ms;
+  --dur-reveal: 1000ms;
+  --stagger: 70ms;
+
+  /* Film grain texture (inline SVG noise) */
+  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ---------- 2. BASE & UTILITIES ------------------------------------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+html {
+  background: var(--navy-950);
+  color-scheme: dark;
+  -webkit-text-size-adjust: 100%;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--navy-950);
+  color: var(--silver-50);
+  font-family: var(--font-ui);
+  font-weight: 300;
+  font-size: 16px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+body.scroll-locked {
+  overflow: hidden;
+  padding-right: var(--scrollbar, 0px);
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+:focus-visible {
+  outline: 1px solid var(--silver-200);
+  outline-offset: 4px;
+}
+
+section[id],
+#collection,
+#heritage,
+#press {
+  scroll-margin-top: 0;
+}
+
+.skip-link {
+  position: fixed;
+  left: var(--space-2);
+  top: var(--space-2);
+  z-index: 200;
+  padding: 10px 18px;
+  border-radius: 999px;
+  background: var(--silver-50);
+  color: var(--ink);
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  transform: translateY(-160%);
+  transition: transform var(--dur-ui) var(--ease-out);
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+}
+
+.display {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 300;
+  line-height: 0.98;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+
+.display em {
+  font-style: italic;
+  font-weight: 300;
+  background: var(--metal);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.eyebrow {
+  margin: 0;
+  font-family: var(--font-ui);
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: var(--track-wide);
+  text-transform: uppercase;
+  color: var(--mist);
+}
+
+.hairline {
+  display: block;
+  width: 72px;
+  height: 1px;
+  background: var(--metal);
+}
+
+/* ---------- 3. SHARED ATMOSPHERE ------------------------------------ */
+.grain {
+  position: absolute;
+  inset: 0;
+  background-image: var(--grain);
+  opacity: 0.07;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+}
+
+.mist {
+  position: absolute;
+  inset: -20% -30%;
+  pointer-events: none;
+  background:
+    radial-gradient(38% 22% at 30% 70%, rgba(190, 205, 230, 0.12), transparent 70%),
+    radial-gradient(30% 18% at 70% 80%, rgba(170, 190, 220, 0.1), transparent 70%);
+}
+
+.mist-b {
+  background:
+    radial-gradient(26% 16% at 60% 60%, rgba(210, 220, 240, 0.09), transparent 70%),
+    radial-gradient(34% 20% at 20% 85%, rgba(150, 170, 210, 0.1), transparent 70%);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .mist-a {
+    animation: mist-drift 38s ease-in-out infinite alternate;
+  }
+  .mist-b {
+    animation: mist-drift 52s ease-in-out -20s infinite alternate-reverse;
+  }
+}
+
+@keyframes mist-drift {
+  from {
+    transform: translate3d(-6%, 0, 0);
+  }
+  to {
+    transform: translate3d(6%, -3%, 0);
+  }
+}
+
+/* Entrance staggering — only when JS is present */
+.js .stagger {
+  opacity: 0;
+  transform: translate3d(0, 18px, 0);
+  transition:
+    opacity 900ms var(--ease-out),
+    transform 900ms var(--ease-out);
+  transition-delay: calc(var(--i, 0) * var(--stagger) + 120ms);
+}
+
+.js .is-loaded .hero .stagger,
+.js .is-visible .stagger {
+  opacity: 1;
+  transform: none;
+}
+
+.js .reveal {
+  opacity: 0;
+  transform: translate3d(0, 28px, 0);
+  transition:
+    opacity var(--dur-reveal) var(--ease-out),
+    transform var(--dur-reveal) var(--ease-out);
+  transition-delay: calc(var(--i, 0) * var(--stagger));
+}
+
+.js .reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+/* ---------- 4. HEADER & BUTTONS ------------------------------------- */
+.site-header {
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 50;
+  height: var(--header-h);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--gutter);
+  transition: background-color var(--dur-ui) ease;
+}
+
+.site-header::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: rgba(4, 8, 18, 0.62);
+  border-bottom: 1px solid var(--line);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  backdrop-filter: blur(16px) saturate(140%);
+  opacity: 0;
+  transition: opacity 400ms ease;
+}
+
+.site-header.is-scrolled::before {
+  opacity: 1;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.brand-bear {
+  width: 58px;
+  height: auto;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.6));
+}
+
+.wordmark {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 500;
+  letter-spacing: 0.42em;
+  margin-right: -0.42em;
+  background: var(--metal);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.site-nav {
+  display: flex;
+  gap: clamp(18px, 3vw, 44px);
+}
+
+.site-nav a {
+  position: relative;
+  padding: 10px 0;
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: var(--track-wide);
+  text-transform: uppercase;
+  color: var(--silver-200);
+  transition: color var(--dur-ui) ease;
+}
+
+.site-nav a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0.32em;
+  bottom: 4px;
+  height: 1px;
+  background: var(--metal);
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 400ms var(--ease-out);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .site-nav a:hover {
+    color: #fff;
+  }
+  .site-nav a:hover::after {
+    transform: scaleX(1);
+    transform-origin: left;
+  }
+}
+
+.lux-button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 28px 16px 32px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  background: rgba(8, 14, 30, 0.35);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: var(--track-ui);
+  text-transform: uppercase;
+  color: var(--silver-50);
+  overflow: hidden;
+  isolation: isolate;
+  transition:
+    border-color var(--dur-ui) ease,
+    color var(--dur-ui) ease,
+    transform var(--dur-press) var(--ease-out);
+}
+
+/* Metallic fill wipes in on hover */
+.lux-button::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--metal);
+  clip-path: inset(0 100% 0 0);
+  transition: clip-path 520ms var(--ease-out);
+}
+
+.lux-button svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.4;
+  transition: transform 400ms var(--ease-out);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .lux-button:hover {
+    color: var(--ink);
+    border-color: transparent;
+  }
+  .lux-button:hover::before {
+    clip-path: inset(0 0 0 0);
+  }
+  .lux-button:hover svg {
+    transform: translateX(4px);
+  }
+}
+
+.lux-button:active {
+  transform: scale(0.97);
+}
+
+.text-link {
+  margin-top: var(--space-3);
+  padding: 6px 0;
+  border: 0;
+  border-bottom: 1px solid var(--line-strong);
+  background: none;
+  font-size: 11px;
+  letter-spacing: var(--track-ui);
+  text-transform: uppercase;
+  color: inherit;
+  transition: border-color var(--dur-ui) ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .text-link:hover {
+    border-color: currentColor;
+  }
+}
+
+/* ---------- 5. HERO -------------------------------------------------- */
+.hero {
+  position: relative;
+  min-height: max(100svh, 720px);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+  align-items: center;
+  gap: var(--space-4);
+  padding: calc(var(--header-h) + var(--space-6)) var(--gutter) 150px;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.hero-env {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+}
+
+.hero-sky {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(42% 52% at 70% 34%, rgba(64, 104, 178, 0.42), transparent 70%),
+    radial-gradient(60% 50% at 18% 20%, rgba(22, 46, 98, 0.7), transparent 72%),
+    radial-gradient(80% 60% at 50% 110%, rgba(0, 0, 0, 0.9), transparent 70%),
+    linear-gradient(180deg, #060e24 0%, #0a1a3e 46%, #050a18 70%, #020409 100%);
+}
+
+/* Silver light rays falling from above the bottle */
+.hero-rays {
+  position: absolute;
+  inset: -20% -10% 20% 20%;
+  background: repeating-conic-gradient(
+    from 172deg at 62% -6%,
+    rgba(220, 230, 250, 0) 0deg,
+    rgba(220, 230, 250, 0.075) 1.6deg,
+    rgba(220, 230, 250, 0) 4.2deg,
+    rgba(220, 230, 250, 0) 7deg
+  );
+  -webkit-mask-image: radial-gradient(60% 80% at 62% 0%, #000 0%, transparent 78%);
+  mask-image: radial-gradient(60% 80% at 62% 0%, #000 0%, transparent 78%);
+  mix-blend-mode: screen;
+}
+
+/* Oversized engraved wordmark behind the stage */
+.hero-ghost {
+  position: absolute;
+  left: 38%;
+  right: -4%;
+  top: 12%;
+  text-align: center;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 25%);
+  mask-image: linear-gradient(90deg, transparent, #000 25%);
+  font-family: var(--font-display);
+  font-size: clamp(110px, 17vw, 300px);
+  font-weight: 300;
+  letter-spacing: 0.06em;
+  line-height: 1;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(200, 212, 235, 0.09);
+  background: linear-gradient(180deg, rgba(160, 180, 220, 0.08), rgba(160, 180, 220, 0) 70%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  user-select: none;
+}
+
+/* Glossy obsidian floor with a lit pool under the bottle */
+.hero-floor {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 30%;
+  background:
+    radial-gradient(28% 40% at 70% 0%, rgba(150, 175, 225, 0.28), transparent 70%),
+    linear-gradient(180deg, rgba(8, 17, 42, 0) 0%, #03060f 60%, #010205 100%);
+}
+
+/* Horizon highlight — brightest under the bottle, gone before the copy */
+.hero-floor::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 40%, rgba(170, 190, 230, 0.35) 72%, transparent 100%);
+}
+
+.hero-floor::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    100deg,
+    rgba(255, 255, 255, 0) 0 70px,
+    rgba(255, 255, 255, 0.018) 70px 72px
+  );
+  -webkit-mask-image: linear-gradient(180deg, #000, transparent 80%);
+  mask-image: linear-gradient(180deg, #000, transparent 80%);
+}
+
+.hero-copy {
+  position: relative;
+  max-width: 600px;
+  display: grid;
+  gap: var(--space-3);
+  justify-items: start;
+}
+
+.hero-copy .display {
+  font-size: clamp(52px, 7.2vw, 116px);
+}
+
+.hero-copy .line {
+  display: block;
+}
+
+.lede {
+  margin: 0;
+  max-width: 44ch;
+  font-size: clamp(15px, 1.25vw, 18px);
+  line-height: 1.75;
+  color: var(--mist-soft);
+}
+
+.hero-stage {
+  position: relative;
+  height: min(70svh, 640px);
+  display: grid;
+  place-items: end center;
+  perspective: 1200px;
+}
+
+.hero-halo {
+  position: absolute;
+  left: 50%;
+  bottom: 12%;
+  width: 120%;
+  aspect-ratio: 1;
+  transform: translateX(-50%);
+  background: radial-gradient(closest-side, rgba(120, 155, 220, 0.34), rgba(60, 90, 160, 0.12) 50%, transparent 72%);
+}
+
+.hero-side {
+  position: absolute;
+  bottom: 13%;
+  width: clamp(110px, 12vw, 190px);
+  opacity: 0.5;
+  filter: blur(3px) brightness(0.55) saturate(0.8);
+}
+
+.hero-side-left {
+  left: 6%;
+}
+
+.hero-side-right {
+  right: 4%;
+  bottom: 15%;
+  width: clamp(96px, 10vw, 160px);
+  filter: blur(5px) brightness(0.45) saturate(0.8);
+}
+
+.hero-bottle {
+  width: clamp(230px, 24vw, 380px);
+  margin-bottom: 9%;
+  z-index: 2;
+}
+
+.plinth {
+  position: absolute;
+  bottom: 4%;
+  left: 50%;
+  width: clamp(300px, 34vw, 520px);
+  height: 64px;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background:
+    radial-gradient(50% 50% at 50% 40%, rgba(160, 185, 235, 0.28), transparent 70%),
+    radial-gradient(closest-side, #0c1730, #050914 80%, transparent);
+  box-shadow: 0 -1px 0 rgba(220, 230, 250, 0.22) inset;
+}
+
+.hero-index {
+  position: absolute;
+  left: var(--gutter);
+  right: var(--gutter);
+  bottom: 36px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 28px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+}
+
+.hero-index a {
+  display: inline-flex;
+  gap: 8px;
+  align-items: baseline;
+  font-size: 11px;
+  letter-spacing: var(--track-ui);
+  text-transform: uppercase;
+  color: var(--mist);
+  transition: color var(--dur-ui) ease;
+}
+
+.hero-index a span {
+  font-family: var(--font-display);
+  font-size: 13px;
+  letter-spacing: 0;
+  color: var(--silver-600);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .hero-index a:hover {
+    color: #fff;
+  }
+}
+
+/* ---------- 6. COLLECTION CARDS ------------------------------------- */
+.collection {
+  position: relative;
+  padding: var(--space-12) var(--gutter) calc(var(--space-12) + 48px);
+  background:
+    radial-gradient(50% 40% at 80% 0%, rgba(29, 58, 114, 0.4), transparent 70%),
+    radial-gradient(40% 40% at 0% 100%, rgba(18, 38, 79, 0.5), transparent 70%),
+    linear-gradient(180deg, #010205 0%, var(--navy-900) 30%, var(--navy-950) 100%);
+  overflow: hidden;
+}
+
+.section-heading {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  align-items: end;
+  gap: var(--space-2) var(--space-8);
+  margin-bottom: var(--space-8);
+}
+
+.section-heading .eyebrow {
+  grid-column: 1 / -1;
+}
+
+.section-heading .display {
+  font-size: clamp(40px, 5vw, 76px);
+}
+
+.section-note {
+  margin: 0;
+  max-width: 42ch;
+  color: var(--mist-soft);
+  line-height: 1.75;
+}
+
+.collection-grid {
+  position: relative;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: clamp(14px, 1.6vw, 24px);
+}
+
+/* Editorial stagger: every other column sits lower */
+.card-item:nth-child(even) {
+  margin-top: 56px;
+}
+
+.scent-card {
+  position: relative;
+  display: block;
+  aspect-ratio: 3 / 4.25;
+  border-radius: var(--radius-surface);
+  overflow: hidden;
+  isolation: isolate;
+  background: var(--charcoal);
+  border: 1px solid var(--line);
+  transform: translateZ(0);
+}
+
+/* Glow ring that fades in on hover (opacity only) */
+.scent-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--glow) 55%, transparent),
+    inset 0 -80px 120px -60px color-mix(in srgb, var(--glow) 45%, transparent);
+  opacity: 0;
+  transition: opacity 500ms ease;
+  pointer-events: none;
+}
+
+.card-scene {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(1.04);
+  transition: transform 1200ms var(--ease-out);
+}
+
+.card-shade {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(3, 6, 14, 0.15) 0%, rgba(3, 6, 14, 0) 30%, rgba(3, 6, 14, 0.55) 62%, rgba(3, 6, 14, 0.94) 100%);
+}
+
+.card-bottle {
+  position: absolute;
+  left: 50%;
+  bottom: 34%;
+  width: 38%;
+  transform: translateX(-50%);
+  filter: drop-shadow(0 18px 18px rgba(0, 0, 0, 0.55));
+  transition: transform 900ms var(--ease-out);
+}
+
+.card-sweep {
+  position: absolute;
+  inset: -20% -60%;
+  background: linear-gradient(
+    105deg,
+    transparent 40%,
+    rgba(255, 255, 255, 0.16) 48%,
+    rgba(255, 255, 255, 0.04) 54%,
+    transparent 60%
+  );
+  transform: translateX(-60%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.card-copy {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: grid;
+  gap: 6px;
+  padding: clamp(16px, 1.6vw, 24px);
+}
+
+.card-num {
+  font-family: var(--font-display);
+  font-size: 14px;
+  color: var(--silver-400);
+}
+
+.card-name {
+  font-family: var(--font-display);
+  font-size: clamp(24px, 2.1vw, 34px);
+  font-weight: 400;
+  line-height: 1.05;
+}
+
+.card-sub {
+  font-size: 10.5px;
+  letter-spacing: var(--track-ui);
+  text-transform: uppercase;
+  color: var(--mist-soft);
+}
+
+.card-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  font-size: 10.5px;
+  letter-spacing: var(--track-ui);
+  text-transform: uppercase;
+  color: var(--silver-200);
+}
+
+.card-cta svg {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.4;
+  transition: transform 400ms var(--ease-out);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .scent-card:hover .card-scene {
+    transform: scale(1.12);
+  }
+  .scent-card:hover .card-bottle {
+    transform: translateX(-50%) translateY(-10px) scale(1.04);
+  }
+  .scent-card:hover::after {
+    opacity: 1;
+  }
+  .scent-card:hover .card-sweep {
+    opacity: 1;
+    transform: translateX(60%);
+    transition:
+      transform 1100ms var(--ease-out),
+      opacity 200ms ease;
+  }
+  .scent-card:hover .card-cta svg {
+    transform: translateX(5px);
+  }
+}
+
+.scent-card:active {
+  transform: scale(0.985);
+  transition: transform var(--dur-press) var(--ease-out);
+}
+
+/* ---------- 7. SCENT SECTIONS --------------------------------------- */
+.scent-section {
+  --text: var(--silver-50);
+  --text-soft: var(--mist-soft);
+  --panel: rgba(4, 7, 16, 0.42);
+  position: relative;
+  min-height: max(100svh, 760px);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 0.78fr);
+  grid-template-areas: "copy stage accords";
+  align-items: center;
+  gap: var(--space-4);
+  padding: calc(var(--header-h) + var(--space-6)) var(--gutter) var(--space-12);
+  color: var(--text);
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.scent-section.is-mirrored {
+  grid-template-columns: minmax(0, 0.78fr) minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-areas: "accords stage copy";
+}
+
+.scene {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  background: var(--navy-950);
+}
+
+.scene-bg {
+  position: absolute;
+  inset: -14% 0;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+
+.js .scent-section .scene-bg {
+  opacity: 0;
+  scale: 1.1;
+  transition:
+    opacity 1400ms var(--ease-out),
+    scale 2200ms var(--ease-out);
+}
+
+.js .scent-section.is-visible .scene-bg {
+  opacity: 1;
+  scale: 1;
+}
+
+/* Colour wash keeps the copy legible and ties the scene to its accent */
+.scene-wash {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, var(--navy-950) 0%, transparent 14%, transparent 84%, var(--navy-950) 100%),
+    linear-gradient(90deg, rgba(var(--tint), 0.94) 0%, rgba(var(--tint), 0.7) 26%, rgba(var(--tint), 0.12) 52%, rgba(var(--tint), 0.2) 70%, rgba(var(--tint), 0.82) 100%),
+    radial-gradient(40% 50% at 50% 55%, color-mix(in srgb, var(--glow) 18%, transparent), transparent 70%);
+}
+
+.is-mirrored .scene-wash {
+  background:
+    linear-gradient(180deg, var(--navy-950) 0%, transparent 14%, transparent 84%, var(--navy-950) 100%),
+    linear-gradient(270deg, rgba(var(--tint), 0.94) 0%, rgba(var(--tint), 0.7) 26%, rgba(var(--tint), 0.12) 52%, rgba(var(--tint), 0.2) 70%, rgba(var(--tint), 0.82) 100%),
+    radial-gradient(40% 50% at 50% 55%, color-mix(in srgb, var(--glow) 18%, transparent), transparent 70%);
+}
+
+/* Light-toned scene (Lily in the Valley): ink typography on ivory */
+.tone-light {
+  --text: var(--ink);
+  --text-soft: rgba(32, 34, 44, 0.74);
+  --panel: rgba(255, 252, 245, 0.5);
+  --line: rgba(40, 36, 30, 0.16);
+  --line-strong: rgba(40, 36, 30, 0.34);
+}
+
+.tone-light .scene {
+  background: #efe9dd;
+}
+
+.tone-light .scene-wash {
+  background:
+    linear-gradient(180deg, var(--navy-950) 0%, rgba(239, 233, 221, 0) 9%, rgba(239, 233, 221, 0) 93%, rgba(3, 7, 15, 0.85) 100%),
+    linear-gradient(270deg, rgba(var(--tint), 0.92) 0%, rgba(var(--tint), 0.72) 28%, rgba(var(--tint), 0.08) 54%, rgba(var(--tint), 0.1) 70%, rgba(var(--tint), 0.7) 100%);
+}
+
+.tone-light .eyebrow,
+.tone-light .scent-copy .eyebrow {
+  color: #8a6f3e;
+}
+
+.tone-light .scent-index {
+  -webkit-text-stroke-color: rgba(120, 96, 56, 0.35);
+}
+
+.tone-light .display em,
+.tone-light .scent-subtitle {
+  color: #6b5a3c;
+}
+
+.tone-light .lux-button {
+  background: rgba(23, 26, 34, 0.9);
+  color: var(--silver-50);
+  border-color: transparent;
+}
+
+.tone-light .accord-track {
+  background: rgba(40, 36, 30, 0.12);
+}
+
+.tone-light .grain {
+  mix-blend-mode: multiply;
+  opacity: 0.05;
+}
+
+.scent-index {
+  position: absolute;
+  right: var(--gutter);
+  bottom: 8%;
+  z-index: -1;
+  font-family: var(--font-display);
+  font-size: clamp(140px, 18vw, 300px);
+  font-weight: 300;
+  line-height: 1;
+  color: transparent;
+  -webkit-text-stroke: 1px color-mix(in srgb, var(--glow) 28%, transparent);
+  user-select: none;
+}
+
+.is-mirrored .scent-index {
+  right: auto;
+  left: var(--gutter);
+}
+
+.scent-copy {
+  grid-area: copy;
+  display: grid;
+  gap: 18px;
+  justify-items: start;
+  max-width: 520px;
+}
+
+.is-mirrored .scent-copy {
+  justify-self: end;
+}
+
+.scent-copy .eyebrow {
+  color: var(--glow);
+}
+
+.scent-copy .display {
+  font-size: clamp(56px, 6.6vw, 112px);
+  text-shadow: 0 4px 40px rgba(0, 0, 0, 0.35);
+}
+
+.tone-light .scent-copy .display {
+  text-shadow: none;
+}
+
+.scent-subtitle {
+  margin: 0;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: clamp(20px, 1.8vw, 28px);
+  color: var(--silver-200);
+}
+
+.scent-desc {
+  margin: 0;
+  max-width: 42ch;
+  font-size: 16px;
+  line-height: 1.75;
+  color: var(--text-soft);
+}
+
+.scent-mood {
+  margin: 0 0 6px;
+  max-width: 44ch;
+  padding-left: 14px;
+  border-left: 1px solid color-mix(in srgb, var(--glow) 60%, transparent);
+  font-size: 13px;
+  font-style: italic;
+  line-height: 1.6;
+  color: var(--text-soft);
+}
+
+.scent-stage {
+  grid-area: stage;
+  position: relative;
+  display: grid;
+  place-items: center;
+  perspective: 1200px;
+}
+
+.stage-halo {
+  position: absolute;
+  width: 140%;
+  aspect-ratio: 1;
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--glow) 34%, transparent), transparent 70%);
+  pointer-events: none;
+}
+
+.js .scent-stage .bottle-rig {
+  opacity: 0;
+  translate: 0 40px;
+  transition:
+    opacity 1200ms var(--ease-out) 200ms,
+    translate 1400ms var(--ease-out) 200ms;
+}
+
+.js .is-visible .scent-stage .bottle-rig {
+  opacity: 1;
+  translate: 0 0;
+}
+
+.scent-stage .bottle-rig {
+  width: clamp(220px, 22vw, 360px);
+}
+
+/* The bottle rig: render + masked light sweep + floor reflection + contact shadow */
+.bottle-rig {
+  position: relative;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+.bottle-img {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  height: auto;
+  filter: drop-shadow(0 30px 40px rgba(0, 0, 0, 0.5)) drop-shadow(0 0 1px rgba(255, 255, 255, 0.4));
+}
+
+/* Light sweep clipped to the bottle silhouette */
+.bottle-sheen {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  overflow: hidden;
+  pointer-events: none;
+  -webkit-mask: var(--bottle) center / 100% 100% no-repeat;
+  mask: var(--bottle) center / 100% 100% no-repeat;
+  mix-blend-mode: screen;
+}
+
+.bottle-sheen i {
+  position: absolute;
+  inset: -10% -100%;
+  background: linear-gradient(
+    100deg,
+    transparent 38%,
+    rgba(255, 255, 255, 0.05) 44%,
+    rgba(255, 255, 255, 0.55) 50%,
+    rgba(255, 255, 255, 0.05) 56%,
+    transparent 62%
+  );
+  transform: translateX(-55%);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .bottle-sheen i {
+    animation: sheen 7.5s var(--ease-in-out) infinite;
+  }
+  .scent-section:nth-of-type(odd) .bottle-sheen i {
+    animation-delay: -3s;
+  }
+}
+
+@keyframes sheen {
+  0%,
+  62% {
+    transform: translateX(-55%);
+  }
+  100% {
+    transform: translateX(55%);
+  }
+}
+
+.bottle-reflection {
+  position: absolute;
+  left: 0;
+  top: 100%;
+  width: 100%;
+  transform: scaleY(-1);
+  opacity: 0.22;
+  margin-top: 2px;
+  -webkit-mask-image: linear-gradient(0deg, rgba(0, 0, 0, 0.9), transparent 34%);
+  mask-image: linear-gradient(0deg, rgba(0, 0, 0, 0.9), transparent 34%);
+  pointer-events: none;
+}
+
+.bottle-shadow {
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  bottom: -14px;
+  height: 30px;
+  z-index: 1;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(0, 0, 0, 0.75), transparent);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .hero-bottle .bottle-img,
+  .hero-bottle .bottle-sheen {
+    animation: float 7s ease-in-out infinite alternate;
+  }
+  .hero-bottle .bottle-shadow {
+    animation: float-shadow 7s ease-in-out infinite alternate;
+  }
+}
+
+@keyframes float {
+  to {
+    transform: translate3d(0, -12px, 0);
+  }
+}
+
+@keyframes float-shadow {
+  to {
+    transform: scale(0.88);
+    opacity: 0.7;
+  }
+}
+
+/* Accord preview panel */
+.accord-panel {
+  grid-area: accords;
+  width: 100%;
+  max-width: 340px;
+  justify-self: end;
+  padding: var(--space-4) 28px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-surface);
+  background: var(--panel);
+  -webkit-backdrop-filter: blur(18px) saturate(130%);
+  backdrop-filter: blur(18px) saturate(130%);
+  color: var(--text);
+}
+
+.is-mirrored .accord-panel {
+  justify-self: start;
+}
+
+.js .accord-panel {
+  opacity: 0;
+  translate: 0 24px;
+  transition:
+    opacity 900ms var(--ease-out) 450ms,
+    translate 900ms var(--ease-out) 450ms;
+}
+
+.js .is-visible .accord-panel {
+  opacity: 1;
+  translate: 0 0;
+}
+
+.panel-title {
+  margin: 0 0 var(--space-3);
+  font-family: var(--font-ui);
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: var(--track-wide);
+  text-transform: uppercase;
+  color: var(--mist);
+}
+
+.tone-light .panel-title {
+  color: rgba(40, 36, 30, 0.62);
+}
+
+.accords {
+  display: grid;
+  gap: 12px;
+}
+
+.accord {
+  display: grid;
+  grid-template-columns: minmax(84px, 0.9fr) minmax(0, 1.4fr) 26px;
+  align-items: center;
+  gap: 12px;
+  font-size: 12.5px;
+}
+
+.accord-label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.accord-value {
+  font-family: var(--font-display);
+  font-size: 15px;
+  text-align: right;
+  color: var(--text-soft, var(--mist));
+  font-variant-numeric: tabular-nums;
+}
+
+.accord-track {
+  position: relative;
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+}
+
+.accord-track i {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--bar) 70%, #000), var(--bar));
+  box-shadow: 0 0 12px color-mix(in srgb, var(--bar) 60%, transparent);
+  transform: scaleX(var(--value));
+  transform-origin: left;
+}
+
+.js .accord-track i {
+  transform: scaleX(0);
+  transition: transform 1100ms var(--ease-out);
+  transition-delay: calc(var(--i, 0) * 60ms + 200ms);
+}
+
+.js .is-visible .accord-track i,
+.js .bars-in .accord-track i {
+  transform: scaleX(var(--value));
+}
+
+/* ---------- 8. PER-SCENT PARTICLE LAYERS ---------------------------- */
+.particles {
+  position: absolute;
+  inset: -10% 0;
+  pointer-events: none;
+}
+
+.particles > span {
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+  width: var(--s);
+  height: var(--s);
+  border-radius: 50%;
+}
+
+/* Verdius — condensation beading on cold glass */
+.particles-droplets > span {
+  height: calc(var(--s) * 1.25);
+  background: radial-gradient(
+    circle at 38% 30%,
+    rgba(255, 255, 255, 0.95) 0 10%,
+    rgba(200, 240, 225, 0.32) 28%,
+    rgba(120, 180, 160, 0.08) 62%,
+    rgba(255, 255, 255, 0.18) 78%,
+    transparent 82%
+  );
+  box-shadow: 0 2px 2px rgba(0, 0, 0, 0.35);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .particles-droplets > span:nth-child(3n) {
+    animation: trickle var(--t) cubic-bezier(0.6, 0, 0.4, 1) var(--d) infinite;
+  }
+}
+
+@keyframes trickle {
+  0%,
+  55% {
+    transform: translate3d(0, 0, 0);
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate3d(0, 140px, 0);
+    opacity: 0;
+  }
+}
+
+/* Wavekiss — frozen sea spray suspended mid-air */
+.particles-waves > span {
+  background: radial-gradient(
+    circle at 35% 30%,
+    #fff 0 9%,
+    rgba(160, 225, 255, 0.45) 30%,
+    rgba(80, 160, 210, 0.08) 66%,
+    rgba(220, 245, 255, 0.3) 80%,
+    transparent 84%
+  );
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .particles-waves > span {
+    animation: bob var(--t) ease-in-out var(--d) infinite alternate;
+  }
+}
+
+@keyframes bob {
+  to {
+    transform: translate3d(8px, -22px, 0);
+  }
+}
+
+/* Celestia Rose — air bubbles rising through ice */
+.particles-bubbles > span {
+  border: 1px solid rgba(225, 240, 255, 0.55);
+  background: radial-gradient(circle at 32% 28%, rgba(255, 255, 255, 0.85) 0 8%, rgba(200, 225, 255, 0.08) 40%, transparent 70%);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .particles-bubbles > span {
+    animation: rise var(--t) linear var(--d) infinite;
+  }
+}
+
+@keyframes rise {
+  0% {
+    transform: translate3d(0, 0, 0);
+    opacity: 0;
+  }
+  15%,
+  80% {
+    opacity: 0.9;
+  }
+  100% {
+    transform: translate3d(10px, -280px, 0);
+    opacity: 0;
+  }
+}
+
+/* Lily in the Valley — floating polished silver spheres */
+.particles-spheres > span {
+  background: radial-gradient(
+    circle at 34% 28%,
+    #ffffff 0 7%,
+    #e3e6eb 16%,
+    #9da4b0 42%,
+    #4d535e 70%,
+    #c9ced6 92%
+  );
+  box-shadow:
+    0 18px 30px rgba(80, 64, 40, 0.28),
+    inset -4px -6px 10px rgba(0, 0, 0, 0.25);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .particles-spheres > span {
+    animation: bob var(--t) ease-in-out var(--d) infinite alternate;
+  }
+}
+
+/* Seductress — black lace edging and silver glints */
+.particles-lace::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 50% 50%, transparent 5px, rgba(0, 0, 0, 0.55) 6px, transparent 7px) 0 0 / 22px 22px,
+    radial-gradient(circle at 50% 50%, rgba(0, 0, 0, 0.5) 1.5px, transparent 2.5px) 11px 11px / 22px 22px;
+  -webkit-mask-image: radial-gradient(70% 70% at 50% 50%, transparent 55%, #000 100%);
+  mask-image: radial-gradient(70% 70% at 50% 50%, transparent 55%, #000 100%);
+  opacity: 0.8;
+}
+
+.particles-lace > span {
+  width: 3px;
+  height: 3px;
+  background: #fff;
+  box-shadow:
+    0 0 8px 2px rgba(255, 255, 255, 0.6),
+    0 0 18px 4px rgba(212, 74, 104, 0.35);
+  opacity: 0.2;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .particles-lace > span {
+    animation: glint var(--t) ease-in-out var(--d) infinite;
+  }
+}
+
+@keyframes glint {
+  0%,
+  70%,
+  100% {
+    opacity: 0.1;
+    transform: scale(0.6);
+  }
+  82% {
+    opacity: 1;
+    transform: scale(1.4);
+  }
+}
+
+/* Chestnut Rush — slow cigar smoke curling upward */
+.smoke {
+  position: absolute;
+  width: 46vw;
+  height: 40vw;
+  max-width: 720px;
+  max-height: 620px;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(220, 200, 180, 0.12), rgba(220, 200, 180, 0.04) 60%, transparent);
+}
+
+.smoke.s1 {
+  left: 30%;
+  top: 40%;
+}
+
+.smoke.s2 {
+  left: 55%;
+  top: 55%;
+  width: 34vw;
+}
+
+.smoke.s3 {
+  left: 10%;
+  top: 60%;
+  width: 28vw;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .smoke {
+    animation: smoke 22s ease-in-out infinite;
+  }
+  .smoke.s2 {
+    animation-delay: -8s;
+  }
+  .smoke.s3 {
+    animation-delay: -15s;
+  }
+}
+
+@keyframes smoke {
+  0% {
+    transform: translate3d(0, 10%, 0) scale(0.9) rotate(0deg);
+    opacity: 0;
+  }
+  30% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate3d(8%, -40%, 0) scale(1.3) rotate(12deg);
+    opacity: 0;
+  }
+}
+
+/* Tonvira — market ticker and data-screen glow */
+.ticker {
+  position: absolute;
+  left: 0;
+  bottom: 14%;
+  display: flex;
+  width: max-content;
+  white-space: nowrap;
+  padding: 8px 0;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 11px;
+  letter-spacing: 0.24em;
+  color: rgba(150, 200, 255, 0.55);
+  border-block: 1px solid rgba(134, 168, 213, 0.18);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 15%, #000 85%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 15%, #000 85%, transparent);
+}
+
+.ticker span {
+  padding-right: 0.24em;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .ticker {
+    animation: ticker 60s linear infinite;
+  }
+}
+
+@keyframes ticker {
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+.data-screen {
+  position: absolute;
+  border: 1px solid rgba(134, 168, 213, 0.22);
+  background:
+    repeating-linear-gradient(180deg, rgba(134, 200, 255, 0.08) 0 1px, transparent 1px 6px),
+    linear-gradient(160deg, rgba(60, 120, 200, 0.14), rgba(10, 20, 40, 0.1));
+  box-shadow: 0 0 60px rgba(80, 140, 230, 0.12);
+}
+
+.data-screen::after {
+  content: "";
+  position: absolute;
+  inset: 30% 10% 20%;
+  border-bottom: 1px solid rgba(120, 220, 200, 0.5);
+  clip-path: polygon(0 80%, 15% 60%, 28% 70%, 42% 40%, 58% 52%, 72% 22%, 86% 30%, 100% 8%, 100% 100%, 0 100%);
+  background: linear-gradient(180deg, rgba(99, 220, 201, 0.35), rgba(99, 220, 201, 0));
+}
+
+/* Placed above the accord panel so they never sit behind copy */
+.data-a {
+  left: 8%;
+  top: 16%;
+  width: 170px;
+  height: 96px;
+}
+
+.data-b {
+  left: 22%;
+  top: 22%;
+  width: 110px;
+  height: 64px;
+  opacity: 0.55;
+}
+
+/* Berry Tease — light rolling across velvet drapery */
+.velvet-sheen {
+  position: absolute;
+  inset: 0 -40%;
+  background: linear-gradient(
+    115deg,
+    transparent 35%,
+    rgba(200, 150, 255, 0.1) 45%,
+    rgba(255, 230, 255, 0.14) 50%,
+    rgba(200, 150, 255, 0.08) 55%,
+    transparent 65%
+  );
+  mix-blend-mode: screen;
+}
+
+.velvet-sheen.v2 {
+  opacity: 0.6;
+  transform: translateX(20%);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .velvet-sheen {
+    animation: velvet 16s ease-in-out infinite alternate;
+  }
+  .velvet-sheen.v2 {
+    animation-duration: 22s;
+    animation-direction: alternate-reverse;
+  }
+}
+
+@keyframes velvet {
+  from {
+    transform: translateX(-18%);
+  }
+  to {
+    transform: translateX(18%);
+  }
+}
+
+/* ---------- 9. HERITAGE, PRESS, FOOTER ------------------------------ */
+.heritage {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  align-items: center;
+  gap: var(--space-12);
+  padding: calc(var(--space-12) + 40px) var(--gutter);
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.heritage-env {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(36% 50% at 26% 50%, rgba(80, 110, 170, 0.32), transparent 70%),
+    radial-gradient(60% 60% at 100% 0%, rgba(18, 38, 79, 0.55), transparent 70%),
+    linear-gradient(180deg, var(--navy-950), #070c1a 50%, var(--obsidian));
+}
+
+.heritage-rays {
+  position: absolute;
+  inset: 0;
+  background: repeating-conic-gradient(
+    from 0deg at 26% 50%,
+    rgba(220, 230, 250, 0) 0deg,
+    rgba(220, 230, 250, 0.05) 1deg,
+    rgba(220, 230, 250, 0) 3deg,
+    rgba(220, 230, 250, 0) 9deg
+  );
+  -webkit-mask-image: radial-gradient(34% 60% at 26% 50%, #000, transparent 80%);
+  mask-image: radial-gradient(34% 60% at 26% 50%, #000, transparent 80%);
+}
+
+.heritage-medallion {
+  position: relative;
+  justify-self: center;
+  width: min(420px, 80vw);
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, #0e1a36 0%, #070d1e 70%, #03060d 100%);
+  box-shadow:
+    0 40px 80px rgba(0, 0, 0, 0.6),
+    inset 0 2px 0 rgba(255, 255, 255, 0.08);
+}
+
+/* Brushed-silver ring */
+.medallion-ring {
+  position: absolute;
+  inset: -2px;
+  border-radius: 50%;
+  padding: 3px;
+  background: conic-gradient(from 40deg, #6d7482, #f6f7f9, #8e95a3, #ffffff, #5d6370, #dfe3ea, #6d7482);
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box exclude,
+    linear-gradient(#000 0 0);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .medallion-ring {
+    animation: spin 40s linear infinite;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(1turn);
+  }
+}
+
+.heritage-medallion img {
+  width: 62%;
+  filter: drop-shadow(0 16px 24px rgba(0, 0, 0, 0.6));
+}
+
+.heritage-copy {
+  display: grid;
+  gap: var(--space-3);
+  max-width: 600px;
+}
+
+.heritage-copy .display {
+  font-size: clamp(40px, 4.6vw, 72px);
+}
+
+.heritage-copy p:not(.eyebrow) {
+  margin: 0;
+  color: var(--mist-soft);
+  line-height: 1.8;
+}
+
+.press {
+  position: relative;
+  padding: var(--space-12) var(--gutter);
+  background: linear-gradient(180deg, var(--obsidian), var(--navy-900));
+}
+
+.press .section-heading {
+  grid-template-columns: 1fr;
+}
+
+.press-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.press-grid li {
+  position: relative;
+  display: grid;
+  gap: 12px;
+  align-content: start;
+  padding: var(--space-4) var(--space-3) var(--space-4) 0;
+  border-top: 1px solid var(--line);
+}
+
+.press-grid li::before {
+  content: "";
+  position: absolute;
+  top: -1px;
+  left: 0;
+  width: 48px;
+  height: 1px;
+  background: var(--metal);
+}
+
+.press-num {
+  font-family: var(--font-display);
+  font-size: 44px;
+  font-weight: 300;
+  line-height: 1;
+  background: var(--metal);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.press-grid h3 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 400;
+}
+
+.press-grid p {
+  margin: 0;
+  color: var(--mist-soft);
+  font-size: 14.5px;
+  line-height: 1.7;
+}
+
+.press-kit {
+  margin: var(--space-8) 0 0;
+  font-size: 11px;
+  letter-spacing: var(--track-wide);
+  text-transform: uppercase;
+  color: var(--silver-600);
+}
+
+.site-footer {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  padding: var(--space-8) var(--gutter) var(--space-6);
+  border-top: 1px solid var(--line);
+  background: var(--navy-900);
+  text-align: center;
+}
+
+.site-footer img {
+  width: 64px;
+  height: auto;
+  opacity: 0.85;
+}
+
+.site-footer p {
+  margin: 0;
+  font-size: 11px;
+  letter-spacing: var(--track-wide);
+  text-transform: uppercase;
+  color: var(--silver-600);
+}
+
+/* ---------- 10. DISCOVER-THE-SCENT DRAWER --------------------------- */
+.drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  background: rgba(2, 4, 10, 0.62);
+  -webkit-backdrop-filter: blur(10px) saturate(120%);
+  backdrop-filter: blur(10px) saturate(120%);
+  opacity: 0;
+  transition: opacity 360ms ease;
+}
+
+.drawer-open .drawer-backdrop {
+  opacity: 1;
+}
+
+.scent-drawer {
+  --glow: var(--silver-200);
+  position: fixed;
+  left: 50%;
+  bottom: 0;
+  z-index: 100;
+  width: min(1180px, 100%);
+  translate: -50% 0;
+  transform: translateY(100%);
+  transition: transform var(--dur-drawer) var(--ease-drawer);
+}
+
+.drawer-open .scent-drawer {
+  transform: translateY(0);
+}
+
+.drawer-inner {
+  position: relative;
+  max-height: min(88svh, 900px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 18px clamp(20px, 3.4vw, 48px) clamp(28px, 4vw, 48px);
+  border: 1px solid var(--line-strong);
+  border-bottom: 0;
+  border-radius: var(--radius-sheet) var(--radius-sheet) 0 0;
+  background:
+    radial-gradient(60% 40% at 15% 0%, color-mix(in srgb, var(--glow) 16%, transparent), transparent 70%),
+    linear-gradient(180deg, rgba(12, 22, 46, 0.94), rgba(5, 9, 20, 0.97));
+  -webkit-backdrop-filter: blur(24px);
+  backdrop-filter: blur(24px);
+  box-shadow: 0 -30px 80px rgba(0, 0, 0, 0.55);
+}
+
+.drawer-grabber {
+  display: block;
+  width: 44px;
+  height: 4px;
+  margin: 0 auto 18px;
+  border-radius: 999px;
+  background: var(--line-strong);
+}
+
+.drawer-header {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-3);
+  padding-bottom: var(--space-3);
+  margin-bottom: var(--space-4);
+  border-bottom: 1px solid var(--line);
+}
+
+.drawer-bottle {
+  width: 64px;
+  height: auto;
+  filter: drop-shadow(0 10px 14px rgba(0, 0, 0, 0.6));
+}
+
+.drawer-header .eyebrow {
+  color: var(--glow);
+}
+
+.drawer-header .display {
+  margin-top: 6px;
+  font-size: clamp(36px, 4vw, 60px);
+}
+
+.drawer-subtitle {
+  margin: 6px 0 0;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 20px;
+  color: var(--silver-200);
+}
+
+.drawer-actions {
+  display: flex;
+  gap: 8px;
+  align-self: start;
+}
+
+.icon-button {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.03);
+  transition:
+    background-color var(--dur-ui) ease,
+    border-color var(--dur-ui) ease,
+    transform var(--dur-press) var(--ease-out);
+}
+
+.icon-button svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.4;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .icon-button:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: var(--silver-200);
+  }
+}
+
+.icon-button:active {
+  transform: scale(0.94);
+}
+
+.drawer-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr) minmax(0, 0.95fr);
+  gap: clamp(20px, 3vw, 48px);
+}
+
+.drawer-panel {
+  min-width: 0;
+}
+
+/* Pyramid: tiers widen toward the base over a faint triangle */
+.pyramid {
+  position: relative;
+  display: grid;
+  gap: 18px;
+  padding-top: 8px;
+}
+
+.pyramid::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 -8px;
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--glow) 16%, transparent), rgba(255, 255, 255, 0.02));
+  pointer-events: none;
+}
+
+.tier {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  padding-inline: calc((2 - var(--t)) * 12%);
+  text-align: center;
+}
+
+.js .bars-in .tier {
+  animation: tier-in 600ms var(--ease-out) both;
+  animation-delay: calc(var(--t) * 80ms + 120ms);
+}
+
+@keyframes tier-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 10px, 0);
+  }
+}
+
+.tier-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 10.5px;
+  letter-spacing: var(--track-wide);
+  text-transform: uppercase;
+  color: var(--glow);
+}
+
+.tier-label svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.chips {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 14px 5px 5px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(8, 14, 30, 0.6);
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.chip-mark {
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #fff, color-mix(in srgb, var(--glow) 70%, #333) 70%);
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.drawer-about {
+  margin: 0 0 var(--space-3);
+  color: var(--mist-soft);
+  line-height: 1.75;
+  font-size: 14.5px;
+}
+
+.facts {
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  border-top: 1px solid var(--line);
+}
+
+.fact {
+  padding: 14px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.fact:nth-child(odd) {
+  padding-right: 12px;
+}
+
+.fact dt {
+  font-size: 10px;
+  letter-spacing: var(--track-ui);
+  text-transform: uppercase;
+  color: var(--mist);
+}
+
+.fact dd {
+  margin: 4px 0 0;
+  font-family: var(--font-display);
+  font-size: 20px;
+  line-height: 1.2;
+}
+
+/* ---------- 11. RESPONSIVE & REDUCED MOTION ------------------------- */
+@media (max-width: 1100px) {
+  .hero {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 0.9fr);
+  }
+
+  .collection-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .card-item:nth-child(even) {
+    margin-top: 0;
+  }
+
+  .card-item:nth-child(4n + 2),
+  .card-item:nth-child(4n + 4) {
+    margin-top: 40px;
+  }
+
+  .scent-section,
+  .scent-section.is-mirrored {
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+    grid-template-areas:
+      "copy stage"
+      "accords stage";
+    align-content: center;
+  }
+
+  .scent-section.is-mirrored {
+    grid-template-areas:
+      "stage copy"
+      "stage accords";
+  }
+
+  .accord-panel,
+  .is-mirrored .accord-panel,
+  .is-mirrored .scent-copy {
+    justify-self: start;
+  }
+
+  .drawer-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .drawer-grid > :last-child {
+    grid-column: 1 / -1;
+  }
+
+  .press-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  :root {
+    --header-h: 64px;
+  }
+
+  .brand-bear {
+    width: 44px;
+  }
+
+  .wordmark {
+    font-size: 17px;
+    letter-spacing: 0.34em;
+    margin-right: -0.34em;
+  }
+
+  .site-nav {
+    gap: 16px;
+  }
+
+  .site-nav a {
+    font-size: 10px;
+    letter-spacing: 0.2em;
+  }
+
+  .hero {
+    grid-template-columns: 1fr;
+    align-content: start;
+    gap: 0;
+    padding-bottom: 200px;
+  }
+
+  .hero-copy {
+    z-index: 2;
+  }
+
+  .hero-stage {
+    height: 52svh;
+    min-height: 360px;
+    margin-top: var(--space-2);
+  }
+
+  .hero-bottle {
+    width: min(56vw, 250px);
+  }
+
+  .hero-side-left {
+    left: 0;
+  }
+
+  .hero-side-right {
+    right: 0;
+  }
+
+  .hero-ghost {
+    top: auto;
+    bottom: 34%;
+  }
+
+  .hero-index {
+    gap: 8px 18px;
+  }
+
+  .section-heading {
+    grid-template-columns: 1fr;
+    margin-bottom: var(--space-6);
+  }
+
+  /* Swipeable card rail on phones */
+  .collection {
+    padding-bottom: var(--space-12);
+  }
+
+  .collection-grid {
+    display: flex;
+    gap: 14px;
+    margin-inline: calc(var(--gutter) * -1);
+    padding-inline: var(--gutter);
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: var(--gutter);
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+  }
+
+  .collection-grid::-webkit-scrollbar {
+    display: none;
+  }
+
+  .card-item,
+  .card-item:nth-child(n) {
+    flex: 0 0 76vw;
+    max-width: 320px;
+    margin-top: 0;
+    scroll-snap-align: start;
+  }
+
+  /* Rail cards start off-screen sideways, so they never "scroll into view" */
+  .js .card-item.reveal {
+    opacity: 1;
+    transform: none;
+  }
+
+  .scent-section,
+  .scent-section.is-mirrored {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "copy"
+      "stage"
+      "accords";
+    gap: var(--space-4);
+    padding-bottom: var(--space-8);
+  }
+
+  .scene-wash,
+  .is-mirrored .scene-wash {
+    background:
+      linear-gradient(180deg, rgba(var(--tint), 0.96) 0%, rgba(var(--tint), 0.78) 34%, rgba(var(--tint), 0.25) 58%, rgba(var(--tint), 0.75) 85%, var(--navy-950) 100%);
+  }
+
+  .tone-light .scene-wash {
+    background: linear-gradient(180deg, var(--navy-950) 0%, rgba(var(--tint), 0.95) 8%, rgba(var(--tint), 0.75) 40%, rgba(var(--tint), 0.2) 62%, rgba(var(--tint), 0.75) 88%, var(--navy-950) 100%);
+  }
+
+  .scent-stage .bottle-rig {
+    width: min(52vw, 240px);
+  }
+
+  .accord-panel,
+  .is-mirrored .accord-panel {
+    max-width: none;
+  }
+
+  .scent-index {
+    font-size: 120px;
+    bottom: auto;
+    top: calc(var(--header-h) + 8px);
+  }
+
+  .is-mirrored .scent-index {
+    left: auto;
+    right: var(--gutter);
+  }
+
+  .heritage {
+    grid-template-columns: 1fr;
+    gap: var(--space-8);
+  }
+
+  .heritage-medallion {
+    width: min(300px, 76vw);
+  }
+
+  .press-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .drawer-header {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .drawer-actions {
+    grid-column: 1 / -1;
+    grid-row: 1;
+    justify-content: flex-end;
+  }
+
+  .drawer-bottle {
+    width: 52px;
+  }
+
+  .drawer-grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-6);
+  }
+}
+
+@media (max-width: 400px) {
+  .wordmark {
+    display: none;
+  }
+}
+
+/* Reduced motion: keep fades that aid comprehension, drop movement */
+@media (prefers-reduced-motion: reduce) {
+  .js .stagger,
+  .js .reveal,
+  .js .accord-panel,
+  .js .scent-stage .bottle-rig {
+    transform: none;
+    translate: none;
+    transition-duration: 300ms;
+    transition-delay: 0ms;
+  }
+
+  .js .scent-section .scene-bg {
+    scale: none;
+    transition-duration: 300ms;
+  }
+
+  .js .accord-track i {
+    transition: none;
+  }
+
+  .scent-drawer {
+    transition: opacity 200ms ease;
+    transform: none;
+    opacity: 0;
+  }
+
+  .drawer-open .scent-drawer {
+    opacity: 1;
+  }
+
+  .js .bars-in .tier {
+    animation: none;
+  }
+
+  .card-scene,
+  .card-bottle,
+  .card-sweep {
+    transition: none !important;
+  }
+}

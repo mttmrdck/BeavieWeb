@@ -2,18 +2,35 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#050a17" />
+    <meta
+      name="description"
+      content="BEAVIE Parfums — A Collection of Atmospheres. Eight scents, each composed as its own cinematic world."
+    />
     <title>BEAVIE Parfums | A Collection of Atmospheres</title>
-    <link rel="icon" href="./assets/logo/beavie_logo.png" />
+    <link rel="icon" type="image/png" href="assets/icons/favicon.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@300;400;500&display=swap"
+    />
+    <link rel="preload" as="image" href="assets/images/bottles/tonvira.webp" />
     <link rel="stylesheet" href="style.css" />
+    <!-- Enables entrance animations only when JS runs; without it all content stays visible. -->
+    <script>document.documentElement.classList.add("js");</script>
   </head>
   <body>
-    <header class="site-header" aria-label="Primary navigation">
-      <a class="brand" href="#top" aria-label="BEAVIE home">
-        <img class="brand-logo" src="assets/logo/beavie_logo.png" alt="BEAVIE Logo" />
+    <a class="skip-link" href="#collection">Skip to the collection</a>
+
+    <!-- ============ HEADER ============ -->
+    <header class="site-header" id="site-header">
+      <a class="brand" href="#top" aria-label="BEAVIE Parfums, back to top">
+        <img class="brand-bear" src="assets/icons/beavie-bear.webp" alt="" width="590" height="298" />
         <span class="wordmark">BEAVIE</span>
       </a>
-      <nav>
+      <nav class="site-nav" aria-label="Primary">
         <a href="#collection">Collection</a>
         <a href="#heritage">Heritage</a>
         <a href="#press">Press</a>
@@ -21,111 +38,181 @@
     </header>
 
     <main id="top">
-      <section class="hero cinematic-section" aria-labelledby="hero-title">
-        <div class="noise"></div>
-        <div class="mist mist-a"></div>
-        <div class="mist mist-b"></div>
-        <div class="hero-rays" aria-hidden="true"></div>
-        <div class="hero-copy reveal">
-          <p class="eyebrow">BEAVIE Parfums</p>
-          <h1 id="hero-title">A Collection of Atmospheres</h1>
-          <span class="hairline"></span>
-          <p>
-            Eight scents. Infinite expressions. Crafted for every moment,
-            designed to leave a lasting impression.
+      <!-- ============ HERO ============ -->
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="hero-env" aria-hidden="true">
+          <div class="hero-sky"></div>
+          <div class="hero-rays" data-parallax="0.18"></div>
+          <div class="hero-ghost" data-parallax="0.32">BEAVIE</div>
+          <div class="hero-floor"></div>
+          <div class="mist mist-a"></div>
+          <div class="mist mist-b"></div>
+          <div class="grain"></div>
+        </div>
+
+        <div class="hero-copy">
+          <p class="eyebrow stagger" style="--i: 0">BEAVIE Parfums &nbsp;·&nbsp; The Collection</p>
+          <h1 id="hero-title" class="display">
+            <span class="line stagger" style="--i: 1">A Collection</span>
+            <span class="line stagger" style="--i: 2"><em>of</em> Atmospheres</span>
+          </h1>
+          <span class="hairline stagger" style="--i: 3"></span>
+          <p class="lede stagger" style="--i: 4">
+            Eight scents. Infinite expressions. Crafted for every moment, designed to leave a lasting impression.
           </p>
-          <a class="lux-button" href="#collection">
-            Discover the Collection <span aria-hidden="true">-></span>
+          <a class="lux-button stagger" style="--i: 5" href="#collection">
+            <span>Discover the Collection</span>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h15m-5-5 5 5-5 5" /></svg>
           </a>
         </div>
-        <div class="hero-stage reveal" aria-hidden="true">
-          <img
-            class="product-bottle hero-product-bottle"
-            src="assets/products/verdius.png"
-            alt="BEAVIE Verdius perfume bottle"
-            loading="eager"
-            decoding="async"
-            fetchpriority="high"
-          />
-          <div class="product-shadow"></div>
+
+        <div class="hero-stage" aria-hidden="true">
+          <div class="hero-halo"></div>
+          <img class="hero-side hero-side-left" src="assets/images/bottles/verdius.webp" alt="" />
+          <img class="hero-side hero-side-right" src="assets/images/bottles/seductress.webp" alt="" />
+          <div class="bottle-rig hero-bottle" style="--bottle: url('assets/images/bottles/tonvira.webp')">
+            <img class="bottle-img" src="assets/images/bottles/tonvira.webp" alt="" fetchpriority="high" />
+            <span class="bottle-sheen"><i></i></span>
+            <img class="bottle-reflection" src="assets/images/bottles/tonvira.webp" alt="" />
+            <span class="bottle-shadow"></span>
+          </div>
+          <div class="plinth"></div>
         </div>
+
+        <nav class="hero-index" aria-label="Jump to a scent" id="hero-index"></nav>
       </section>
 
-      <section class="collection-preview" id="collection" aria-labelledby="collection-title">
-        <div class="section-heading reveal">
+      <!-- ============ COLLECTION PREVIEW ============ -->
+      <section class="collection" id="collection" aria-labelledby="collection-title">
+        <div class="grain" aria-hidden="true"></div>
+        <header class="section-heading reveal">
           <p class="eyebrow">Explore the Collection</p>
-          <h2 id="collection-title">Eight moods, bottled as cinematic worlds.</h2>
-        </div>
-        <div class="collection-grid" id="collection-grid"></div>
+          <h2 id="collection-title" class="display">Eight moods, <em>bottled</em> as cinematic worlds.</h2>
+          <p class="section-note">
+            From cold slate condensation to vanilla-lit gardens, each BEAVIE fragrance is composed as a place you can
+            step into.
+          </p>
+        </header>
+        <!-- Cards are generated from the `scents` array in script.js -->
+        <ol class="collection-grid" id="collection-grid"></ol>
       </section>
 
+      <!-- ============ SCENT SECTIONS (generated in script.js) ============ -->
       <div id="scent-sections"></div>
 
-      <section class="heritage cinematic-section" id="heritage" aria-labelledby="heritage-title">
-        <div class="noise"></div>
-        <div class="heritage-copy reveal">
-          <p class="eyebrow">The BEAVIE Heritage</p>
-          <h2 id="heritage-title">Crafted with Intention. Made to Be Remembered.</h2>
-          <span class="hairline"></span>
-          <p>
-            BEAVIE composes fragrance as atmosphere: architecture, texture,
-            temperature, and memory held inside glass. Every bottle is shaped
-            for contrast, presence, and the quiet confidence of a signature.
-          </p>
+      <!-- ============ HERITAGE ============ -->
+      <section class="heritage" id="heritage" aria-labelledby="heritage-title">
+        <div class="heritage-env" aria-hidden="true">
+          <div class="heritage-rays"></div>
+          <div class="grain"></div>
         </div>
         <div class="heritage-medallion reveal" aria-hidden="true">
-          <img class="heritage-logo" src="assets/logo/beavie_logo.png" alt="BEAVIE Logo" />
+          <span class="medallion-ring"></span>
+          <img src="assets/icons/beavie-logo.webp" alt="" />
+        </div>
+        <div class="heritage-copy reveal">
+          <p class="eyebrow">The BEAVIE Heritage</p>
+          <h2 id="heritage-title" class="display">Crafted with intention. <em>Made to be remembered.</em></h2>
+          <span class="hairline"></span>
+          <p>
+            BEAVIE composes fragrance as atmosphere: architecture, texture, temperature, and memory held inside glass.
+            Every bottle is shaped for contrast, presence, and the quiet confidence of a signature — a frosted cube of
+            glass crowned by a seamless sphere of polished silver.
+          </p>
+          <p>
+            The silver bear is our emblem: sculptural, protective, unhurried. It marks every flacon as a promise of
+            craft over trend.
+          </p>
         </div>
       </section>
 
-      <section class="press-strip" id="press" aria-label="BEAVIE principles">
-        <article class="reveal">
-          <span>01</span>
-          <h3>Finest Ingredients</h3>
-          <p>Sourced for clarity, richness, and lasting character.</p>
-        </article>
-        <article class="reveal">
-          <span>02</span>
-          <h3>Masterful Blending</h3>
-          <p>Balanced for depth, diffusion, and emotional contrast.</p>
-        </article>
-        <article class="reveal">
-          <span>03</span>
-          <h3>Timeless Craft</h3>
-          <p>Designed with silver details, glass weight, and ritual in mind.</p>
-        </article>
-        <article class="reveal">
-          <span>04</span>
-          <h3>Made to Inspire</h3>
-          <p>Atmospheres for mornings, evenings, ambition, and escape.</p>
-        </article>
+      <!-- ============ PRESS / PRINCIPLES ============ -->
+      <section class="press" id="press" aria-labelledby="press-title">
+        <header class="section-heading reveal">
+          <p class="eyebrow">Press &amp; Principles</p>
+          <h2 id="press-title" class="display">What every BEAVIE flacon <em>holds</em>.</h2>
+        </header>
+        <ol class="press-grid">
+          <li class="reveal" style="--i: 0">
+            <span class="press-num">01</span>
+            <h3>Finest Ingredients</h3>
+            <p>Sourced for clarity, richness, and lasting character.</p>
+          </li>
+          <li class="reveal" style="--i: 1">
+            <span class="press-num">02</span>
+            <h3>Masterful Blending</h3>
+            <p>Balanced for depth, diffusion, and emotional contrast.</p>
+          </li>
+          <li class="reveal" style="--i: 2">
+            <span class="press-num">03</span>
+            <h3>Timeless Craft</h3>
+            <p>Designed with silver details, glass weight, and ritual in mind.</p>
+          </li>
+          <li class="reveal" style="--i: 3">
+            <span class="press-num">04</span>
+            <h3>Made to Inspire</h3>
+            <p>Atmospheres for mornings, evenings, ambition, and escape.</p>
+          </li>
+        </ol>
+        <p class="press-kit reveal">Press kit, imagery, and sample requests available on enquiry.</p>
       </section>
     </main>
 
+    <footer class="site-footer">
+      <img src="assets/icons/beavie-bear.webp" alt="" width="590" height="298" />
+      <span class="wordmark">BEAVIE</span>
+      <p>Parfums &nbsp;·&nbsp; A Collection of Atmospheres</p>
+    </footer>
+
+    <!-- ============ DISCOVER THE SCENT — reusable overlay ============ -->
     <div class="drawer-backdrop" id="drawer-backdrop" hidden></div>
-    <aside class="scent-drawer" id="scent-drawer" aria-hidden="true" aria-label="Scent details">
-      <button class="drawer-close" type="button" aria-label="Close scent details">×</button>
-      <div class="drawer-header">
-        <p class="eyebrow" id="drawer-kicker">BEAVIE Parfums</p>
-        <h2 id="drawer-title"></h2>
-        <p id="drawer-subtitle"></p>
+    <div
+      class="scent-drawer"
+      id="scent-drawer"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="drawer-title"
+      hidden
+    >
+      <div class="drawer-inner">
+        <span class="drawer-grabber" aria-hidden="true"></span>
+        <header class="drawer-header">
+          <img class="drawer-bottle" id="drawer-bottle" src="" alt="" />
+          <div>
+            <p class="eyebrow" id="drawer-kicker">BEAVIE Parfums</p>
+            <h2 id="drawer-title" class="display"></h2>
+            <p class="drawer-subtitle" id="drawer-subtitle"></p>
+          </div>
+          <div class="drawer-actions">
+            <button class="icon-button" type="button" data-step="-1" aria-label="Previous scent">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" /></svg>
+            </button>
+            <button class="icon-button" type="button" data-step="1" aria-label="Next scent">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7" /></svg>
+            </button>
+            <button class="icon-button drawer-close" type="button" aria-label="Close scent details">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg>
+            </button>
+          </div>
+        </header>
+
+        <div class="drawer-grid">
+          <section class="drawer-panel" aria-labelledby="pyramid-title">
+            <h3 class="panel-title" id="pyramid-title">Fragrance Pyramid</h3>
+            <div class="pyramid" id="drawer-notes"></div>
+          </section>
+          <section class="drawer-panel" aria-labelledby="accords-title">
+            <h3 class="panel-title" id="accords-title">Main Accords</h3>
+            <div class="accords" id="drawer-accords"></div>
+          </section>
+          <section class="drawer-panel" aria-labelledby="about-title">
+            <h3 class="panel-title" id="about-title">About This Scent</h3>
+            <p class="drawer-about" id="drawer-about"></p>
+            <dl class="facts" id="drawer-facts"></dl>
+          </section>
+        </div>
       </div>
-      <div class="drawer-grid">
-        <section>
-          <p class="panel-title">Fragrance Pyramid</p>
-          <div class="note-groups" id="drawer-notes"></div>
-        </section>
-        <section>
-          <p class="panel-title">Main Accords</p>
-          <div class="drawer-accords" id="drawer-accords"></div>
-        </section>
-        <section>
-          <p class="panel-title">About This Scent</p>
-          <p class="drawer-about" id="drawer-about"></p>
-          <div class="detail-facts" id="drawer-facts"></div>
-        </section>
-      </div>
-    </aside>
+    </div>
 
     <script src="script.js"></script>
   </body>
