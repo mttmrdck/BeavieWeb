@@ -1,0 +1,25 @@
+# Only the website itself is published to Cloudflare.
+# Everything below stays in the repo but is never uploaded.
+
+# Tooling and project metadata
+node_modules/
+.git/
+.claude/
+.wrangler/
+.gitignore
+.assetsignore
+wrangler.jsonc
+package.json
+package-lock.json
+skills-lock.json
+**/.DS_Store
+
+# Separate project, not part of the BEAVIE site
+EpiPulseDashboard/
+
+# Original full-size PNGs — the site uses the WebP copies in assets/images and assets/icons
+assets/backgrounds/
+assets/cards/
+assets/products/
+assets/logo/
+assets/reference/
