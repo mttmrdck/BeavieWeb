@@ -7,14 +7,13 @@
 
    Field guide
    - id          used for the section anchor (#id) and asset file names
-   - scene       full-bleed atmosphere image (assets/images/scenes)
-   - bottle      transparent bottle render (assets/images/bottles)
-   - glow        accent light for this scent (buttons, bars, halos)
-   - tint        colour washed over the scene so copy stays legible
+   - scene       atmosphere image the bottle stands in (assets/images/scenes)
+   - bottle      product render of the flacon (assets/images/bottles),
+                 shown until the 3D stage is ready and whenever it can't run
+   - glow        this scent's light: rim light, haze, buttons, bars
+   - tint        colour washed behind the copy so it stays legible
    - tone        "dark" (light text) or "light" (ink text) section theme
-   - focus       CSS background-position for the scene image
-   - particles   foreground layer: droplets | ticker | smoke | waves |
-                 lace | bubbles | velvet | spheres
+   - focus       CSS background-position for the scene image (fallback only)
    - accords     [label, intensity 0-100, bar colour] — shown strongest
                  first, so order here doesn't matter
    - facts       "About this scent" rows, shown in this order
@@ -33,7 +32,6 @@ const scents = [
     tint: "8, 20, 18",
     tone: "dark",
     focus: "35% 60%",
-    particles: "droplets",
     notes: {
       top: ["Green Apple", "Bergamot", "Iced Aldehydes"],
       middle: ["Lavender", "Aromatic Herbs", "Rosemary"],
@@ -74,7 +72,6 @@ const scents = [
     tint: "6, 12, 30",
     tone: "dark",
     focus: "50% 50%",
-    particles: "ticker",
     notes: {
       top: ["Mint", "Bergamot", "Cardamom"],
       middle: ["Lavender", "Sage", "Green Tea"],
@@ -116,7 +113,6 @@ const scents = [
     tint: "22, 10, 6",
     tone: "dark",
     focus: "45% 50%",
-    particles: "smoke",
     notes: {
       top: ["Rum", "Chestnut", "Saffron"],
       middle: ["Tobacco", "Leather", "Lavender"],
@@ -159,7 +155,6 @@ const scents = [
     tint: "2, 16, 32",
     tone: "dark",
     focus: "50% 40%",
-    particles: "waves",
     notes: {
       top: ["Lemon", "Bergamot", "Sea Salt"],
       middle: ["Marine Notes", "Neroli", "Aquatic Accord"],
@@ -201,7 +196,6 @@ const scents = [
     tint: "16, 4, 10",
     tone: "dark",
     focus: "50% 50%",
-    particles: "lace",
     notes: {
       top: ["Raspberry", "Black Cherry", "Pink Pepper"],
       middle: ["Rose", "Jasmine", "Peony"],
@@ -243,7 +237,6 @@ const scents = [
     tint: "10, 22, 44",
     tone: "dark",
     focus: "50% 50%",
-    particles: "bubbles",
     notes: {
       top: ["Frosted Lotus", "Icy Accord", "Pink Peony"],
       middle: ["Rose", "Water Lily", "Translucent Florals"],
@@ -286,7 +279,6 @@ const scents = [
     tint: "14, 6, 26",
     tone: "dark",
     focus: "50% 55%",
-    particles: "velvet",
     notes: {
       top: ["Grape", "Plum", "Red Berries"],
       middle: ["Violet", "Heliotrope", "Fruit Nectar"],
@@ -329,7 +321,6 @@ const scents = [
     tint: "236, 228, 212",
     tone: "light",
     focus: "50% 50%",
-    particles: "spheres",
     notes: {
       top: ["Vanilla Orchid", "Neroli", "Soft Pear"],
       middle: ["Lily of the Valley", "Jasmine Petals", "White Floral Accord"],
@@ -361,23 +352,47 @@ const scents = [
 ];
 
 /* ---------------------------------------------------------------------
+   Bottle + atmosphere per scent
+   ---------------------------------------------------------------------
+   All eight scents share the JETHA flacon; what changes is the label and
+   the world around it.
+   - model       source file in JETHA-3D/website-assets/blend (see
+                 assets/models/manifest.json)
+   - atmosphere  weather + light preset in stage.js, chosen from the
+                 scent's own description above
+   - shopUrl     optional. Give a scent a product page URL and a "Buy"
+                 button appears beside "Discover the scent".
+   --------------------------------------------------------------------- */
+const stageMeta = {
+  verdius: { model: "bayu", atmosphere: "rain" },
+  tonvira: { model: "nirmala", atmosphere: "snow" },
+  "chestnut-rush": { model: "senja", atmosphere: "ember" },
+  wavekiss: { model: "samudera", atmosphere: "spray" },
+  seductress: { model: "purnama", atmosphere: "noir" },
+  "celestia-rose": { model: "ratna", atmosphere: "frost" },
+  "berry-tease": { model: "ranum", atmosphere: "velvet" },
+  "lily-valley": { model: "seroja", atmosphere: "sun" },
+};
+scents.forEach((scent) =>
+  Object.assign(scent, stageMeta[scent.id], {
+    label: `assets/images/labels/${scent.id}.webp`,
+    thumb: scent.bottle.replace(".webp", "-sm.webp"),
+  }),
+);
+const HERO_SCENT = scents.findIndex((s) => s.id === "tonvira");
+
+/* ---------------------------------------------------------------------
    Small helpers
    --------------------------------------------------------------------- */
 const $ = (selector, root = document) => root.querySelector(selector);
+const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
 const pad = (n) => String(n).padStart(2, "0");
 const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 const finePointer = window.matchMedia("(hover: hover) and (pointer: fine)");
-
-// Deterministic pseudo-random numbers so particle layouts are stable per scent.
-function seeded(seed) {
-  let s = seed;
-  return () => {
-    s = (s * 9301 + 49297) % 233280;
-    return s / 233280;
-  };
-}
+const root = document.documentElement;
 
 const byStrength = (accords) => [...accords].sort((a, b) => b[1] - a[1]);
+const arrow = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h15m-5-5 5 5-5 5" /></svg>';
 
 // Tier icons for the fragrance pyramid (inline SVG, inherit currentColor).
 const tierIcons = {
@@ -386,21 +401,11 @@ const tierIcons = {
     '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 12c0-4 2-7 5-8 0 4-2 7-5 8Zm0 0c0-4-2-7-5-8 0 4 2 7 5 8Zm0 0v9M12 16c2-2 4-2 6-1M12 18c-2-2-4-2-6-1"/></svg>',
   base: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 8l9-4 9 4-9 4-9-4Zm0 4 9 4 9-4M3 16l9 4 9-4"/></svg>',
 };
-const tierLabels = { top: "Top Notes", middle: "Heart Notes", base: "Base Notes" };
+const tierLabels = { top: "Top notes", middle: "Heart notes", base: "Base notes" };
 
 /* ---------------------------------------------------------------------
    Markup builders
    --------------------------------------------------------------------- */
-function bottleRig(scent, extraClass = "") {
-  return `
-    <div class="bottle-rig ${extraClass}" style="--bottle:url('${scent.bottle}')">
-      <img class="bottle-img" src="${scent.bottle}" alt="BEAVIE ${scent.name} perfume bottle" loading="lazy" decoding="async" />
-      <span class="bottle-sheen" aria-hidden="true"><i></i></span>
-      <img class="bottle-reflection" src="${scent.bottle}" alt="" aria-hidden="true" loading="lazy" decoding="async" />
-      <span class="bottle-shadow" aria-hidden="true"></span>
-    </div>`;
-}
-
 function accordRows(accords, limit = accords.length) {
   return byStrength(accords)
     .slice(0, limit)
@@ -415,53 +420,29 @@ function accordRows(accords, limit = accords.length) {
     .join("");
 }
 
-function particleLayer(scent, index) {
-  const rand = seeded(index * 97 + 13);
-  const type = scent.particles;
-  const counts = { droplets: 26, bubbles: 22, spheres: 7, lace: 14, waves: 18 };
-  let inner = "";
-
-  if (type === "ticker") {
-    const rows = "BVE ▲ 2.41 · MINT ▲ 0.88 · CEDR ▼ 0.12 · AMBR ▲ 1.37 · VNLA ▲ 3.05 · SAGE ▲ 0.64 · ATHN ▲ 1.92 · ";
-    inner = `<div class="ticker"><span>${rows.repeat(3)}</span><span>${rows.repeat(3)}</span></div>
-             <div class="data-screen data-a"></div><div class="data-screen data-b"></div>`;
-  } else if (type === "smoke") {
-    inner = '<span class="smoke s1"></span><span class="smoke s2"></span><span class="smoke s3"></span>';
-  } else if (type === "velvet") {
-    inner = '<span class="velvet-sheen"></span><span class="velvet-sheen v2"></span>';
-  } else {
-    for (let i = 0; i < (counts[type] || 0); i++) {
-      const size = type === "spheres" ? 14 + rand() * 46 : 3 + rand() * (type === "bubbles" ? 14 : 9);
-      inner += `<span style="--x:${(rand() * 100).toFixed(1)}%; --y:${(rand() * 100).toFixed(1)}%; --s:${size.toFixed(1)}px; --d:${(rand() * -12).toFixed(2)}s; --t:${(8 + rand() * 10).toFixed(2)}s"></span>`;
-    }
-  }
-  return `<div class="particles particles-${type}" data-parallax="0.12" aria-hidden="true">${inner}</div>`;
-}
+const fallbackBottle = (scent, eager = false) =>
+  `<img class="stage-fallback" src="${scent.bottle}" alt="BEAVIE ${scent.name} perfume bottle" width="960" height="1200" ${
+    eager ? 'fetchpriority="high"' : 'loading="lazy"'
+  } decoding="async" />`;
 
 /* ---------------------------------------------------------------------
-   Render: hero index, collection cards, scent sections
+   Render: hero bottle, collection index, scent sections, menus
    --------------------------------------------------------------------- */
-$("#hero-index").innerHTML = scents
-  .map((s, i) => `<a href="#${s.id}"><span>${pad(i + 1)}</span>${s.name}</a>`)
-  .join("");
+$$("[data-stage='hero'], [data-stage='macro']").forEach((el) => (el.dataset.scent = HERO_SCENT));
+$("[data-stage='hero']").innerHTML = fallbackBottle(scents[HERO_SCENT], true);
+$("#hero-shown").textContent = `${scents[HERO_SCENT].name} · ${scents[HERO_SCENT].subtitle}`;
 
-$("#collection-grid").innerHTML = scents
+$("#index-list").innerHTML = scents
   .map(
     (scent, i) => `
-      <li class="card-item reveal" style="--i:${i % 4}">
-        <a class="scent-card" href="#${scent.id}" style="--glow:${scent.glow}">
-          <img class="card-scene" src="${scent.scene.replace(".webp", "-sm.webp")}" alt="" loading="lazy" decoding="async" style="object-position:${scent.focus}" />
-          <span class="card-shade" aria-hidden="true"></span>
-          <img class="card-bottle" src="${scent.bottle}" alt="" loading="lazy" decoding="async" />
-          <span class="card-sweep" aria-hidden="true"></span>
-          <span class="card-copy">
-            <span class="card-num">${pad(i + 1)}</span>
-            <span class="card-name">${scent.name}</span>
-            <span class="card-sub">${scent.subtitle}</span>
-            <span class="card-cta">View Scent
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h15m-5-5 5 5-5 5" /></svg>
-            </span>
-          </span>
+      <li class="reveal" style="--i:${i % 4}">
+        <a class="index-row" href="#${scent.id}" style="--glow:${scent.glow}">
+          <span class="index-num">${pad(i + 1)}</span>
+          <span class="index-name">${scent.name}</span>
+          <span class="index-sub">${scent.subtitle}</span>
+          <span class="index-family">${scent.facts.Family}</span>
+          <img class="index-thumb" src="${scent.thumb}" alt="" width="480" height="600" loading="lazy" decoding="async" />
+          <span class="index-go">${arrow}</span>
         </a>
       </li>`,
   )
@@ -471,56 +452,88 @@ $("#scent-sections").innerHTML = scents
   .map(
     (scent, i) => `
       <section
-        class="scent-section tone-${scent.tone} ${i % 2 ? "is-mirrored" : ""}"
+        class="scent gl-section tone-${scent.tone} ${i % 2 ? "is-mirrored" : ""}"
         id="${scent.id}"
         aria-labelledby="${scent.id}-title"
+        data-index="${i}"
         style="--glow:${scent.glow}; --tint:${scent.tint}"
       >
-        <div class="scene" aria-hidden="true">
-          <div class="scene-bg" data-parallax="0.22" style="background-image:url('${scent.scene}'); background-position:${scent.focus}"></div>
-          <div class="scene-wash"></div>
-          <div class="mist mist-a"></div>
-          ${particleLayer(scent, i)}
-          <div class="grain"></div>
-        </div>
-
-        <span class="scent-index" aria-hidden="true">${pad(i + 1)}</span>
+        <div class="scent-bg" aria-hidden="true" data-bg="${scent.scene}" style="background-position:${scent.focus}"></div>
+        <div class="scent-scrim" aria-hidden="true"></div>
 
         <div class="scent-copy">
-          <p class="eyebrow stagger" style="--i:0">Collection &nbsp;·&nbsp; ${pad(i + 1)} / ${pad(scents.length)}</p>
-          <h2 class="display stagger" id="${scent.id}-title" style="--i:1">${scent.name}</h2>
+          <p class="eyebrow stagger" style="--i:0"><span class="eyebrow-num">No. ${pad(i + 1)}</span> of ${pad(scents.length)}</p>
+          <h2 class="scent-name stagger" id="${scent.id}-title" style="--i:1">${scent.name}</h2>
           <p class="scent-subtitle stagger" style="--i:2">${scent.subtitle}</p>
-          <span class="hairline stagger" style="--i:3"></span>
-          <p class="scent-desc stagger" style="--i:4">${scent.description}</p>
-          <p class="scent-mood stagger" style="--i:5">${scent.mood}</p>
-          <button class="lux-button discover-button stagger" style="--i:6" type="button" data-scent="${i}" aria-haspopup="dialog">
-            <span>Discover the Scent</span>
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14m-7-7h14" /></svg>
-          </button>
+          <p class="scent-desc stagger" style="--i:3">${scent.description}</p>
+          <p class="scent-mood stagger" style="--i:4">${scent.mood}</p>
+          <div class="scent-actions stagger" style="--i:5">
+            <button class="btn btn-primary discover-button" type="button" data-scent="${i}" aria-haspopup="dialog">
+              <span>Discover the scent</span>${arrow}
+            </button>
+            ${scent.shopUrl ? `<a class="btn btn-ghost" href="${scent.shopUrl}"><span>Buy ${scent.name}</span></a>` : ""}
+          </div>
         </div>
 
         <div class="scent-stage">
-          <span class="stage-halo" aria-hidden="true"></span>
-          ${bottleRig(scent)}
+          <div class="stage-anchor" data-stage="scent" data-world="${scent.id}" data-scent="${i}" data-yaw="${i % 2 ? 0.3 : -0.3}">
+            ${fallbackBottle(scent)}
+          </div>
+          <aside class="accord-panel glass" aria-label="${scent.name} main accords preview">
+            <p class="panel-title">Main accords</p>
+            <div class="accords compact">${accordRows(scent.accords, 5)}</div>
+            <button class="text-link discover-button" type="button" data-scent="${i}" aria-haspopup="dialog">
+              All ${scent.accords.length} accords and notes
+            </button>
+          </aside>
         </div>
-
-        <aside class="accord-panel" aria-label="${scent.name} main accords preview">
-          <p class="panel-title">Main Accords</p>
-          <div class="accords compact">${accordRows(scent.accords, 6)}</div>
-          <button class="text-link discover-button" type="button" data-scent="${i}" aria-haspopup="dialog">
-            All ${scent.accords.length} accords &amp; notes
-          </button>
-        </aside>
       </section>`,
   )
   .join("");
 
+const scentLinks = scents.map((s, i) => `<li><a href="#${s.id}"><span>${pad(i + 1)}</span>${s.name}</a></li>`).join("");
+$("#menu-scents").innerHTML = scentLinks;
+$("#footer-scents").innerHTML = scentLinks;
+
 /* ---------------------------------------------------------------------
-   Header state
+   The stage: WebGL when the device can, product renders when it can't
    --------------------------------------------------------------------- */
-const header = $("#site-header");
-const updateHeader = () => header.classList.toggle("is-scrolled", window.scrollY > 40);
-updateHeader();
+const sections = $$(".scent");
+function canWebGL() {
+  try {
+    const c = document.createElement("canvas");
+    return !!(window.WebGL2RenderingContext && c.getContext("webgl2"));
+  } catch {
+    return false;
+  }
+}
+
+function useFallbackScenes() {
+  root.classList.remove("gl", "gl-ready");
+  const io = new IntersectionObserver(
+    (entries) =>
+      entries.forEach((e) => {
+        if (!e.isIntersecting) return;
+        const bg = $(".scent-bg", e.target);
+        bg.style.backgroundImage = `url('${bg.dataset.bg}')`;
+        io.unobserve(e.target);
+      }),
+    { rootMargin: "60% 0px" },
+  );
+  sections.forEach((s) => io.observe(s));
+}
+
+if (canWebGL() && !new URLSearchParams(location.search).has("nogl")) {
+  root.classList.add("gl");
+  import("./stage.js")
+    .then((m) => m.createStage({ canvas: $("#stage"), scents, reduceMotion, finePointer }))
+    .catch((error) => {
+      console.warn("BEAVIE stage unavailable, showing product renders instead.", error);
+      useFallbackScenes();
+    });
+} else {
+  useFallbackScenes();
+}
 
 // Plays the hero entrance once the first frame has painted.
 requestAnimationFrame(() => requestAnimationFrame(() => document.body.classList.add("is-loaded")));
@@ -536,101 +549,122 @@ const revealObserver = new IntersectionObserver(
       revealObserver.unobserve(entry.target);
     });
   },
-  { threshold: 0.2, rootMargin: "0px 0px -8% 0px" },
+  { threshold: 0.18, rootMargin: "0px 0px -8% 0px" },
 );
-document.querySelectorAll(".reveal, .scent-section").forEach((el) => revealObserver.observe(el));
+$$(".reveal, .scent").forEach((el) => revealObserver.observe(el));
 
 /* ---------------------------------------------------------------------
-   Parallax — transforms set directly on each layer (no CSS-variable
-   cascades), only for sections currently near the viewport.
+   Header state, current nav link, and the statement's word-by-word reveal
    --------------------------------------------------------------------- */
-const parallaxSections = [...document.querySelectorAll(".hero, .scent-section")].map((section) => ({
-  section,
-  layers: [...section.querySelectorAll("[data-parallax]")].map((el) => [el, Number(el.dataset.parallax)]),
-}));
-const nearViewport = new Set();
-const parallaxObserver = new IntersectionObserver(
-  (entries) =>
-    entries.forEach((e) => {
-      const item = parallaxSections.find((p) => p.section === e.target);
-      e.isIntersecting ? nearViewport.add(item) : nearViewport.delete(item);
-    }),
-  { rootMargin: "20% 0px" },
-);
-parallaxSections.forEach((p) => parallaxObserver.observe(p.section));
+const header = $("#site-header");
+const statement = $("#statement-text");
+statement.innerHTML = statement.textContent
+  .trim()
+  .split(/\s+/)
+  .map((word) => `<span class="w">${word}</span>`)
+  .join(" ");
+const words = $$(".w", statement);
 
 let scrollTicking = false;
-function applyParallax() {
+function onScroll() {
   scrollTicking = false;
-  updateHeader();
-  if (reduceMotion.matches) return;
+  header.classList.toggle("is-scrolled", window.scrollY > 40);
+  if (reduceMotion.matches) return words.forEach((w) => w.classList.add("is-lit"));
+  const rect = statement.getBoundingClientRect();
   const vh = window.innerHeight;
-  nearViewport.forEach(({ section, layers }) => {
-    const rect = section.getBoundingClientRect();
-    // -1 when the section sits below the viewport, 0 centred, 1 above.
-    const progress = (vh / 2 - (rect.top + rect.height / 2)) / vh;
-    layers.forEach(([el, depth]) => {
-      el.style.transform = `translate3d(0, ${(progress * depth * 100).toFixed(2)}px, 0)`;
-    });
-  });
+  if (rect.bottom < 0 || rect.top > vh) return;
+  const progress = (vh * 0.82 - rect.top) / (rect.height + vh * 0.3);
+  const lit = Math.round(progress * words.length);
+  words.forEach((w, i) => w.classList.toggle("is-lit", i < lit));
 }
 window.addEventListener(
   "scroll",
   () => {
     if (!scrollTicking) {
       scrollTicking = true;
-      requestAnimationFrame(applyParallax);
+      requestAnimationFrame(onScroll);
     }
   },
   { passive: true },
 );
-window.addEventListener("resize", applyParallax);
-applyParallax();
+window.addEventListener("resize", onScroll);
+onScroll();
+
+const navLinks = $$(".site-nav a");
+const navObserver = new IntersectionObserver(
+  (entries) =>
+    entries.forEach((e) => {
+      if (!e.isIntersecting) return;
+      const group = e.target.closest("[data-nav]").dataset.nav;
+      navLinks.forEach((a) => a.toggleAttribute("aria-current", a.getAttribute("href") === `#${group}`));
+    }),
+  { rootMargin: "-45% 0px -45% 0px" },
+);
+$$("[data-nav]").forEach((el) => navObserver.observe(el));
 
 /* ---------------------------------------------------------------------
-   Bottle tilt — decorative pointer tracking, eased toward the target
-   so it carries momentum instead of snapping to the cursor.
+   Scent rail — where you are in the collection, and the way to the next
    --------------------------------------------------------------------- */
-document.querySelectorAll(".hero-stage, .scent-stage").forEach((stage) => {
-  const rig = stage.querySelector(".bottle-rig");
-  let target = { x: 0, y: 0 };
-  let current = { x: 0, y: 0 };
-  let frame = 0;
+const rail = $("#scent-rail");
+let railIndex = -1;
+const visibleScents = new Set();
+function setRail(index) {
+  railIndex = index;
+  const scent = scents[index];
+  $("#rail-count").textContent = `${pad(index + 1)} / ${pad(scents.length)}`;
+  $("#rail-name").textContent = scent.name;
+  $("#rail-notes").dataset.scent = index;
+  rail.style.setProperty("--glow", scent.glow);
+  $("[data-rail='-1']").disabled = index === 0;
+  $("[data-rail='1']").disabled = index === scents.length - 1;
+}
+const railObserver = new IntersectionObserver(
+  (entries) => {
+    entries.forEach((e) => (e.isIntersecting ? visibleScents.add(e.target) : visibleScents.delete(e.target)));
+    rail.classList.toggle("is-on", visibleScents.size > 0);
+    rail.inert = visibleScents.size === 0;
+    const current = sections.find((s) => visibleScents.has(s));
+    if (current && Number(current.dataset.index) !== railIndex) setRail(Number(current.dataset.index));
+  },
+  { rootMargin: "-50% 0px -49% 0px" },
+);
+sections.forEach((s) => railObserver.observe(s));
+rail.inert = true;
+const goToScent = (index) =>
+  sections[index].scrollIntoView({ behavior: reduceMotion.matches ? "auto" : "smooth", block: "start" });
 
-  const step = () => {
-    current.x += (target.x - current.x) * 0.08;
-    current.y += (target.y - current.y) * 0.08;
-    rig.style.transform = `rotateY(${(current.x * 10).toFixed(2)}deg) rotateX(${(current.y * -6).toFixed(2)}deg)`;
-    rig.style.setProperty("--sheen-x", `${(50 + current.x * 60).toFixed(1)}%`);
-    const settled = Math.abs(target.x - current.x) < 0.001 && Math.abs(target.y - current.y) < 0.001;
-    frame = settled ? 0 : requestAnimationFrame(step);
-  };
-  const kick = () => {
-    if (!frame) frame = requestAnimationFrame(step);
-  };
-
-  const zone = stage.closest("section");
-  zone.addEventListener("pointermove", (event) => {
-    if (!finePointer.matches || reduceMotion.matches) return;
-    const rect = zone.getBoundingClientRect();
-    target = {
-      x: (event.clientX - rect.left) / rect.width - 0.5,
-      y: (event.clientY - rect.top) / rect.height - 0.5,
-    };
-    kick();
-  });
-  zone.addEventListener("pointerleave", () => {
-    target = { x: 0, y: 0 };
-    kick();
-  });
-});
+/* ---------------------------------------------------------------------
+   Menu (small screens) — full height panel, links arrive in order
+   --------------------------------------------------------------------- */
+const menu = $("#menu");
+const menuToggle = $("#nav-toggle");
+let menuTimer = 0;
+function setMenu(open) {
+  clearTimeout(menuTimer);
+  menuToggle.setAttribute("aria-expanded", String(open));
+  menuToggle.setAttribute("aria-label", open ? "Close menu" : "Open menu");
+  $("main").inert = open;
+  $(".site-footer").inert = open;
+  if (open) {
+    menu.hidden = false;
+    void menu.offsetWidth;
+    document.body.classList.add("menu-open", "scroll-locked");
+  } else {
+    document.body.classList.remove("menu-open");
+    if (!document.body.classList.contains("drawer-open")) document.body.classList.remove("scroll-locked");
+    menuTimer = setTimeout(() => (menu.hidden = true), reduceMotion.matches ? 0 : 420);
+  }
+}
+menuToggle.addEventListener("click", () => setMenu(menuToggle.getAttribute("aria-expanded") !== "true"));
+menu.addEventListener("click", (event) => event.target.closest("a") && setMenu(false));
+window.matchMedia("(min-width: 861px)").addEventListener("change", (e) => e.matches && setMenu(false));
 
 /* ---------------------------------------------------------------------
    Discover the Scent — reusable overlay drawer
    --------------------------------------------------------------------- */
 const drawer = $("#scent-drawer");
 const backdrop = $("#drawer-backdrop");
-const pageRegions = [$("main"), header, $(".site-footer")];
+const pageRegions = [$("main"), header, $(".site-footer"), rail];
 let activeIndex = 0;
 let lastTrigger = null;
 let closeTimer = 0;
@@ -640,9 +674,9 @@ function fillDrawer(index) {
   activeIndex = index;
   drawer.style.setProperty("--glow", scent.glow);
 
-  $("#drawer-bottle").src = scent.bottle;
+  $("#drawer-bottle").src = scent.thumb;
   $("#drawer-bottle").alt = `BEAVIE ${scent.name} perfume bottle`;
-  $("#drawer-kicker").textContent = `Collection · ${pad(index + 1)} / ${pad(scents.length)}`;
+  $("#drawer-kicker").textContent = `No. ${pad(index + 1)} of ${pad(scents.length)}`;
   $("#drawer-title").textContent = scent.name;
   $("#drawer-subtitle").textContent = scent.subtitle;
   $("#drawer-about").textContent = `${scent.description} ${scent.mood}`;
@@ -653,7 +687,7 @@ function fillDrawer(index) {
         <div class="tier tier-${tier}" style="--t:${t}">
           <p class="tier-label">${tierIcons[tier]}<span>${tierLabels[tier]}</span></p>
           <ul class="chips">
-            ${scent.notes[tier].map((note) => `<li class="chip"><span class="chip-mark">${note.charAt(0)}</span>${note}</li>`).join("")}
+            ${scent.notes[tier].map((note) => `<li class="chip">${note}</li>`).join("")}
           </ul>
         </div>`,
     )
@@ -693,6 +727,7 @@ function closeDrawer() {
   if (!document.body.classList.contains("drawer-open")) return;
   document.body.classList.remove("drawer-open");
   pageRegions.forEach((el) => el && (el.inert = false));
+  rail.inert = visibleScents.size === 0;
 
   closeTimer = setTimeout(
     () => {
@@ -712,6 +747,11 @@ document.addEventListener("click", (event) => {
     openDrawer(Number(discover.dataset.scent), discover);
     return;
   }
+  const railStep = event.target.closest("[data-rail]");
+  if (railStep) {
+    goToScent(railIndex + Number(railStep.dataset.rail));
+    return;
+  }
   const stepper = event.target.closest("[data-step]");
   if (stepper) {
     fillDrawer((activeIndex + Number(stepper.dataset.step) + scents.length) % scents.length);
@@ -720,7 +760,27 @@ document.addEventListener("click", (event) => {
   if (event.target.closest(".drawer-close") || event.target === backdrop) closeDrawer();
 });
 
+function trapFocus(event, container) {
+  const focusables = $$("button:not([disabled]), [href], [tabindex]:not([tabindex='-1'])", container).filter((el) => el.offsetParent);
+  const first = focusables[0];
+  const last = focusables[focusables.length - 1];
+  if (event.shiftKey && document.activeElement === first) {
+    event.preventDefault();
+    last.focus();
+  } else if (!event.shiftKey && document.activeElement === last) {
+    event.preventDefault();
+    first.focus();
+  }
+}
+
 document.addEventListener("keydown", (event) => {
+  if (document.body.classList.contains("menu-open")) {
+    if (event.key === "Escape") {
+      setMenu(false);
+      menuToggle.focus();
+    }
+    return;
+  }
   if (!document.body.classList.contains("drawer-open")) return;
 
   if (event.key === "Escape") {
@@ -728,16 +788,49 @@ document.addEventListener("keydown", (event) => {
   } else if (event.key === "ArrowRight" || event.key === "ArrowLeft") {
     fillDrawer((activeIndex + (event.key === "ArrowRight" ? 1 : -1) + scents.length) % scents.length);
   } else if (event.key === "Tab") {
-    // Keep focus inside the dialog.
-    const focusables = [...drawer.querySelectorAll("button, [href], [tabindex]:not([tabindex='-1'])")];
-    const first = focusables[0];
-    const last = focusables[focusables.length - 1];
-    if (event.shiftKey && document.activeElement === first) {
-      event.preventDefault();
-      last.focus();
-    } else if (!event.shiftKey && document.activeElement === last) {
-      event.preventDefault();
-      first.focus();
-    }
+    trapFocus(event, drawer); // keep focus inside the dialog
   }
 });
+
+/* ---------------------------------------------------------------------
+   Pointer details (desktop only): a trailing ring and weighted buttons
+   --------------------------------------------------------------------- */
+if (finePointer.matches && !reduceMotion.matches) {
+  const ring = $("#cursor-ring");
+  const at = { x: -100, y: -100, tx: -100, ty: -100 };
+  let ringFrame = 0;
+  const follow = () => {
+    at.x += (at.tx - at.x) * 0.18;
+    at.y += (at.ty - at.y) * 0.18;
+    ring.style.transform = `translate3d(${at.x.toFixed(1)}px, ${at.y.toFixed(1)}px, 0)`;
+    ringFrame = Math.abs(at.tx - at.x) + Math.abs(at.ty - at.y) > 0.2 ? requestAnimationFrame(follow) : 0;
+  };
+  window.addEventListener(
+    "pointermove",
+    (event) => {
+      at.tx = event.clientX;
+      at.ty = event.clientY;
+      ring.classList.add("is-on");
+      ring.classList.toggle("is-over", !!event.target.closest?.("a, button"));
+      if (!ringFrame) ringFrame = requestAnimationFrame(follow);
+    },
+    { passive: true },
+  );
+  document.addEventListener("pointerleave", () => ring.classList.remove("is-on"));
+
+  document.addEventListener("pointermove", (event) => {
+    const button = event.target.closest?.(".btn-primary");
+    $$(".btn-primary.is-pulled").forEach((b) => {
+      if (b !== button) {
+        b.classList.remove("is-pulled");
+        b.style.transform = "";
+      }
+    });
+    if (!button) return;
+    const r = button.getBoundingClientRect();
+    const dx = (event.clientX - (r.left + r.width / 2)) / r.width;
+    const dy = (event.clientY - (r.top + r.height / 2)) / r.height;
+    button.classList.add("is-pulled");
+    button.style.transform = `translate3d(${(dx * 10).toFixed(1)}px, ${(dy * 8).toFixed(1)}px, 0)`;
+  });
+}

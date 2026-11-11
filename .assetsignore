@@ -23,3 +23,6 @@ assets/cards/
 assets/products/
 assets/logo/
 assets/reference/
+
+# Local dev server
+dev-server.py
