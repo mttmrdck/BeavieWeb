@@ -141,8 +141,9 @@ export async function createStage({ canvas, scents, reduceMotion, finePointer })
   // Reflections live on their own additive layer so they survive on top of the liquid.
   const shellMat = withSurface(P({ color: "#000000", roughness: 0.03, ior: 1.5, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, envMapIntensity: 1.5 }), "shell");
   shellMat.defines.SHELL = "";
-  const liquidMat = P({ color: "#fff1c9", roughness: 0, transmission: 1, ior: 1.34, thickness: 0.03, attenuationColor: new THREE.Color("#f0c466"), attenuationDistance: 0.55, envMapIntensity: 0.6 });
-  const capMat = P({ color: "#060607", roughness: 0.34, specularIntensity: 0.7, clearcoat: 0.25, clearcoatRoughness: 0.45, envMapIntensity: 1.1 });
+  // Same recipe as bottle.js, so a bottle in its world matches the one in the collection.
+  const liquidMat = P({ color: "#fff6dd", roughness: 0, transmission: 1, ior: 1.34, thickness: 0.06, attenuationColor: new THREE.Color("#f1cf80"), attenuationDistance: 0.9, envMapIntensity: 0.55 });
+  const capMat = P({ color: "#0b0b0d", roughness: 0.4, specularIntensity: 0.6, clearcoat: 0.35, clearcoatRoughness: 0.32, envMapIntensity: 1 });
   const sprayMat = P({ color: "#070708", roughness: 0.2 });
   const tubeMat = P({ color: "#7d8794", roughness: 0.18, envMapIntensity: 0.9 });
   const labelMat = P({ color: "#ffffff", roughness: 0.55, specularIntensity: 0.8, side: THREE.DoubleSide });

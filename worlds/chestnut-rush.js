@@ -26,7 +26,36 @@ export default function create({ lowTier }) {
   // The library wall.
   const spines = ["#3b1410", "#4a2413", "#1f2a1c", "#2a1a2e", "#5a3018", "#141a2a", "#3a2a14", "#501a14"];
   const shelfWood = standard("#170a05", 0.6);
-  const books = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1, 1), standard("#ffffff", 0.55), 420);
+  // Leather spines: raised bands and a gilt title panel, drawn once and tinted per book.
+  const spine = document.createElement("canvas");
+  spine.width = 64;
+  spine.height = 256;
+  {
+    const g = spine.getContext("2d");
+    g.fillStyle = "#d8d2c8";
+    g.fillRect(0, 0, 64, 256);
+    for (let i = 0; i < 2600; i++) {
+      g.fillStyle = `rgba(0,0,0,${Math.random() * 0.08})`;
+      g.fillRect(Math.random() * 64, Math.random() * 256, 2, 2);   // grain
+    }
+    const band = (y) => {
+      g.fillStyle = "rgba(0,0,0,.35)";
+      g.fillRect(0, y + 5, 64, 3);
+      g.fillStyle = "rgba(255,255,255,.35)";
+      g.fillRect(0, y, 64, 3);
+    };
+    [26, 70, 186, 226].forEach(band);
+    g.fillStyle = "#c9a14a";                                         // gilt
+    [20, 64, 180, 220, 236].forEach((y) => g.fillRect(6, y, 52, 2));
+    g.fillRect(14, 104, 36, 2);
+    g.fillRect(14, 150, 36, 2);
+    g.fillStyle = "rgba(201,161,74,.8)";
+    for (let y = 114; y < 144; y += 9) g.fillRect(18 + Math.random() * 6, y, 22 + Math.random() * 6, 3);   // a title, too small to read
+  }
+  const spineTex = new THREE.CanvasTexture(spine);
+  spineTex.colorSpace = THREE.SRGBColorSpace;
+  spineTex.anisotropy = 4;
+  const books = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1, 1), standard("#ffffff", 0.5, { map: spineTex }), 420);
   const m = new THREE.Matrix4(), q = new THREE.Quaternion(), e = new THREE.Euler(), color = new THREE.Color();
   let n = 0;
   for (let row = 0; row < 5; row++) {

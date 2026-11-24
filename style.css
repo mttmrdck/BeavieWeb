@@ -960,17 +960,19 @@ html:has(.theme-light) {
   grid-row: 1 / 3;
   justify-self: center;
   align-self: center;
-  width: min(100%, calc(100svh - 176px), 780px);
-  aspect-ratio: 1;
+  width: min(100%, calc((100svh - 176px) * 1.55), 980px);
+  aspect-ratio: 1.55;
   display: grid;
   place-items: center;
 }
 .rosette-hub {
   position: relative;
+  align-self: end;
+  transform: translateY(100%);
   display: grid;
   justify-items: center;
   gap: 4px;
-  max-width: 30%;
+  max-width: 60%;
   text-align: center;
   pointer-events: none;
 }
@@ -1023,7 +1025,10 @@ html:has(.theme-light) {
 /* With WebGL the links are invisible hit areas laid over the bottles by collection.js. */
 .gl .rosette-link {
   position: absolute;
-  z-index: 2;
+  left: 0;
+  top: 0;
+  border-radius: 40% / 18%;
+  will-change: transform;
 }
 .gl .rosette-link img {
   display: none;
@@ -1331,7 +1336,9 @@ html:not(.gl) .rosette-link img {
   .rosette-ring {
     grid-column: 1;
     grid-row: auto;
-    width: 100%;
+    width: calc(100% + 2 * var(--gutter));
+    margin: 0 calc(-1 * var(--gutter));
+    aspect-ratio: 0.95;
   }
   .rosette-lede {
     font-size: 16px;

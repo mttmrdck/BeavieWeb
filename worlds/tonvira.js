@@ -1,5 +1,6 @@
 /* Tonvira: the peak. A marble floor high above a city at midnight, a colonnade, the glow of screens. */
 import { THREE, mat, ground, points, standard } from "./kit.js";
+import { PAINT } from "./painted.js";
 
 export default function create({ lowTier }) {
   const group = new THREE.Group();
@@ -34,8 +35,19 @@ export default function create({ lowTier }) {
     }
     shaftGeo.computeVertexNormals();
   }
-  const marble = standard("#cfc8ba", 0.42);
-  const block = new THREE.BoxGeometry(2.3, 0.5, 2.3);
+  // Veined marble, lit low and cold from the city side; the flutes catch the light in bands.
+  const marble = mat({
+    fhead: PAINT,
+    fbody: /* glsl */ `
+      vec3 pp = vWorld * .45;
+      float w = fbm(pp.xy * vec2(.6, .25) + pp.z + fbm(pp.yz * .8) * 1.4);
+      float vein = pow(1. - abs(w * 2. - 1.), 22.) * .8 + pow(1. - abs(fbm(pp.xy * 1.7 + 4.) * 2. - 1.), 40.) * .45;
+      vec3 base = mix(vec3(.62, .62, .64), vec3(.86, .85, .83), fbm(pp.xz * 2.));
+      vec3 c = mix(base, vec3(.32, .33, .38), clamp(vein, 0., 1.));
+      col = lit(c, N, V, .32, .045) * (.8 + .25 * smoothstep(-.2, .6, dot(N, normalize(vec3(.4, .2, .9)))));
+    `,
+  });
+  const block = new THREE.CylinderGeometry(1.25, 1.35, 0.5, 48);
   [[-6.5, -8], [6.5, -8], [-6.5, -17], [6.5, -17], [-6.5, -26], [6.5, -26]].forEach(([x, z]) => {
     const column = new THREE.Mesh(shaftGeo, marble);
     column.position.set(x, 7.9, z);
